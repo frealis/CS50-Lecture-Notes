@@ -1,0 +1,618 @@
+-   pset5   ---------------------------------------------------------
+
+MEMORY
+---------------------------------------------------------------------
+- Not all memory is treated equally inside of a computer -- different
+    portions are used for different things.
+
+        ----------------------
+                text
+        ----------------------
+           initialized data
+        ----------------------
+          uninitialized data
+        ----------------------
+                heap
+                  |
+                  |
+                  V
+
+                  ^
+                  |
+                  |
+                stack
+        ----------------------
+        environment variables
+        ----------------------
+
+    ... the 0's and 1's that compose a program are loaded in the "text"
+    area of memory. Below that in the "initialized" and "uninitialized"
+    data area, any global variables in the program are stored in either
+    of these locations -- variables that are assigned values in a
+    program are stored in the "initialized" section, and any variables
+    that are simply declared but have no values yet are stored in the
+    "uninitialized" area.
+
+    ... at the bottom are "enviroment variables" which aren't used too
+    much in this course, but are used for things like web programming,
+    or to store things like usernames and passwords -- things you don't
+    want to save in your code, but that you want your computer to have
+    access to when it needs it.
+
+    ... the "stack" is where functions reside -- everytime a function is
+    called, it gets a "slice" or "frame" of memory.
+
+- In previous examples with the functions swap() and noswap(), it was
+    shown that when you pass variables to a functin by -value-, the
+    original variables remain unchanged. When you pass by -reference-
+    using pointers, or addresses of those variables (ie. int *a), then
+    you can potentially change the variable itself. For example:
+
+    void swap(int *a, int *b)
+    {
+        int tmp = *a;
+        *a = *b;
+        *b = tmp;
+    }
+
+    ... this example uses pointers and whatever two variables get passed
+    to it will be "swapped".
+
+    ... *a without a datatype to the left of it is purely an address
+
+    ... int *a means "give me a pointer to an int", or "declare a
+    variable that will store the address of an int"
+
+- So when functions are called, executed, and then finish, there can be
+    a lot of garbage values left over in the "stack". However, the
+    "heap" functions differently.
+
+- The "stack" is mainly used for short-term storage, while the "heap" is
+    mainly used for long-term storage.
+
+- So for example, let's say main() makes a call to get_string(). A
+    string is then sent to get_string(), and get_string() ends.
+    If the string is stored in the "stack", then as soon as get_string()
+    ends, that data is technically garbage data -- you may get lucky and
+    the data may persist for awhile before it is partially or even
+    totally over-written, but theres no guarantee. That is what the
+    "heap" is for -- to keep that data around a little longer in
+    order to ensure that it gets to main(), data that will not disappear
+    until you free it (that's why it's important to free any memory that
+    is dynamically allocated after using it).
+
+- There are a few different ways to dynamically allocate memory:
+
+    > malloc  - allocates memory to be used
+    > calloc  - clears memory by zeroing it out, wipes it clean
+    > realloc - take a chunk of memory and grow it/resize it
+
+- So, malloc is used to store values on the "heap", but any local
+    variables or arrays declared by a function are stored on the "stack"
+    and so thats why local variables and arrays are used immediately -
+    after the functions that use them end, those values become garbage
+    values. For example:
+
+        int main(void)
+        {
+            int *x;     // store address of an int
+            int *y;     // store address of an int
+            x = malloc(sizeof(int));    // create space in memory for x
+
+            *x = 42;    // store "42" at the location of x
+            *y = 13;    // store "13" at unknown location, seg fault
+
+            y = x;      // assign address of x to y
+            *y = 13;    // store "13" at the location of y = x
+        }
+
+    ... so in the above example, int *y just means "give me space for an
+    address and call it 'y'"; however, no space in memory initially gets
+    allocated for y, so int *y will point to a location in memory but
+    it will be an unknown random place that has not been explicitly
+    allocated, and you may suffer a segmentation fault
+
+    ... later on, with the y = x; statement, the address of x gets
+    assigned to y, so x and y essentially point to the same thing
+
+    ... it seems weird that you can write y = x instead of *y = *x, but
+    since x and y were initially declared as -addresses- then I guess
+    you can do this
+
+- If for some reason you have so many functions that are using space in
+    the "stack" that it starts to fill up and spill into the "heap",
+    then variables that have been declared with malloc() and are
+    supposed to be somewhat-permanent will all of a sudden start to get
+    over-written, ie. stack overflow
+
+- Similarly, the heap can overflow as well and overwhelm the stack.
+    Another term for either heap overflow or stack overflow is
+    "buffer overflow".
+
+- For example:
+
+        #include <string.h>
+
+        void foo(char *bar)
+        {
+            char c[12];
+            memcpy(c, bar, strlen(bar));
+        }
+
+        int main(int argc, char *argv[])
+        {
+            foo(argv[1]);
+        }
+
+    ... in this example, foo(argv[1]); has no error-checking feature, so
+    whatever gets passed into main() from the command line will
+    automatically get passed into foo()
+
+    ... next, foo() accepts as input a string, or char* named "bar",
+    from main(). Then it allocates char c[12], an array of 12 characters
+    named 'c', on the stack
+
+    ... the function memcpy() is a function for "memory copy" -- what it
+    does is copy the second argument into the memory of the first
+    argument, up to the size of the third argument. So in this example,
+    memcpy(c, bar, strlen(bar)); copies strlen(bar) number of bytes
+    from "bar" into 'c'.
+
+    ... a visual representation is as follows:
+
+            Unallocated stack space
+        -------------------------------
+            char c[12]
+
+
+
+        -------------------------------
+            char *bar
+        -------------------------------
+            More unused space
+
+        -------------------------------
+            Return address
+        -------------------------------
+            Parent routine's stack
+
+    ... here, the return address is a bit of code that is sort of
+    stored in memory everytime main() calls another function. The
+    purpose is that once main() hands a value to another function,
+    whenever that function is done what it's doing it then needs to
+    return a value back to main(), but it cannot do so without an
+    address -- hence the return address. It's like main() hands the keys
+    off to the car to another function, and when it's time for that
+    function (or its return value) to get back to main, it needs to
+    use the return address.
+
+    ... the way this program is written, hopefully argv[1] will be no
+    longer than 12 characters, since only 12 bytes are allocated for
+    the buffer in foo(). However, if more than 12 bytes get passed into
+    foo() then it will get stored outside of the c[12] buffer and start
+    to overwrite memory where other things are stored -- potentially
+    even the return address. If the return address gets overwritten,
+    then once main() passes a value to foo(), then foo() will not
+    have an address with which to return a value
+
+    ... a clever hacker might write a program that does something
+    malicious, like delete all files or spam everyone in a contact list,
+    by submitting the program in combination with a lot of other
+    characters to main() in order to overflow the memory and then
+    actually insert this new program, which may be what appears to be
+    a bunch of random ASCII characters but ends up getting interpretted
+    as code. For example, if you can overwrite the return address, you
+    can potentially trick the computer into having a value return to
+    your own malicious program instead of main(), thereby giving you
+    an opportunity to execute your code. This is called a "buffer
+    overflow exploit"
+
+- The main point is that if you do not check the boundaries of your
+    arrays, and it's possible to touch memory that has no been
+    allocated, then bad things can happen.
+
+- One of the tools used for detecting memory leaks and other kinds of
+    memory-related issues is valgrind. For example:
+
+        #include <stdlib.h>
+
+        void f(void)
+        {
+            int *x = malloc(10 * sizeof(int));
+            x[10] = 0;  // writes to the 11th position
+        }
+
+        int main(void)
+        {
+            f();
+            return 0;
+        }
+
+    ... so malloc() takes 10 * 4 bytes of memory and stores it at a
+    location named *x -- it basically allocates a chunk of memory that
+    can contain 10 elements. However, x[10] = 0; attempts to store the
+    value '0' at location x[10], which would be the 11th spot, and
+    outside of the bounds of the memory allocated by malloc(). This
+    results in a buffer overflow.
+
+    ... additionally, the memory allocated by malloc() was not free()'d
+
+- The usage for valgrind is:
+
+        valgrind ./program_name
+
+    ... there is a lot of cryptic output but it can help identify
+    memory-related issues
+
+LINKED LISTS
+---------------------------------------------------------------------
+- If you have an array of size 10, say x[10], but you need x[] to hold
+    11 elements, you can't just add the 11th element -- it would be
+    stored out of bounds of the array and possibly lead to a
+    segmentation fault. What you could do is create a new array, say
+    y[11], and copy all of the values from the old array into the new
+    one. This would be technically correct, but could be argued to have
+    poor design -- you would have to temporarily use twice as much
+    memory in order to copy the array, and if you possibly needed to
+    change the size of the array in the future, you'd have to do it
+    again. Also, it would take time, approximately O(n).
+
+- Linked lists allow you to sort of "append" an array by adding values
+    to an already existing array, and "stitching" the values together
+    digitally. A visual representation might look like this:
+
+                  3    7    9
+        first ->  x -> y -> z
+
+    ... the idea is that each value in the array has an associated
+    pointer value that points to the next value in the array -- so for
+    this example, 3, 7, and 9 are the values, and x, y, and z are the
+    pointers. This essentially results in an array that takes up twice
+    as much memory -- one spot for the value, one spot for the pointer,
+    -- so it doesn't solve the memory issue per se. However, if you
+    wanted to add a value and weren't necessarily concerned with
+    maintaining the order, or sorting, then if you simply add the
+    new value to the beginning of the list then you would save time
+    by having it run at constant time O(1) (since there would only
+    be a few operations -- add a value, update pointers, that's it).
+
+    ... each pointer will point to a "node", which is the next value
+    in the list. These nodes may exist anywhere in memory, specifically
+    in the heap, and they don't have to be back-to-back or contiguous
+
+    ... if you wanted to add another number, you could put it anywhere
+    as long as it has one of the values in the list pointing to it.
+    Additionally, once inserted, it may have a pointer that points to
+    the next value -- this would commonly happen if you wanted to
+    insert a value into a list and maintain sorting
+
+    ... there is one catch with linked lists, they have to have a
+    "first" value, which is basically the address of the first node in
+    the list. In other words, "first" is an address that points to the
+    first node.
+
+- Another thing with linked lists is that you no longer have random
+    access, so you can't jump to a specific location or index as you
+    would with a normal array (ie. buffer[0], buffer[3], buffer[9],
+    etc.) because the elements are no longer contiguous and it's only
+    the pointers that are linking everyhing together.
+
+- So basically, linked lists allow you to get around the problem of not
+    allocated enough memory ahead of time by adding more memory if
+    needed, or, if too much memory was allocated, reducing the amount of
+    memory alloation.
+
+- The pros of linked lists:
+
+    > We get dynamism -- you're no longer stuck painting yourself into
+        the proverbial corner of arrays by allocated enough memory, or
+        conversely, wasting memory by allocating too much just so that
+        we don't have to deal with the problem of memory allocation
+
+- The cons of linked lists:
+
+    > We spend more memory to hold the addresses of all of the pointers
+        and the code is more complex
+
+- Programmer time is a valuable resource -- making something that takes
+    less "programmer time", or "human time" to implement, may cost more
+    in terms of run-time for the program. It's a trade-off.
+
+- When you start to cut corners to write bad code quickly, that takes
+    more time to execute, it's referred to as "technical debt"
+
+DATA STRUCTURES
+---------------------------------------------------------------------
+- The computer is constantly using data structures in order to manage
+    functions and memory
+
+- The "stack" is a data structure, and as mentioned before, you can
+    allocate memory by either creating a fixed size or you can create
+    memory that gets allocated dynamically. For example:
+
+        typedef struct
+        {
+            int numbers[CAPACITY];
+            int top;
+        }
+        stack;
+
+    ... this creates memory that is limited by whatever value is given
+    to CAPACITY. The second variable, "size" or "top", is used in
+    another way -- I think both are somehow used to keep track of which
+    program is on top of the stack.
+
+        typedef struct
+        {
+            int *numbers;
+            int top;
+        }
+        stack;
+
+    ... this creates a pointer to memory, the size of which is not
+    immediately defined. This allows the memory to shrink or expand
+    later on.
+
+- However, we can use it too for various applications
+
+- We can implement a data structure that might have two operations:
+    push and pop, which is analogous to a stack of trays in a cafeteria:
+
+        > push - similar to adding a tray to the "stack"
+
+        > pop - similar to removing a tray from the "stack"
+
+    ... the one thing that is characteristic of a "stack" is it is a
+    LIFO data structure -- last in, first out
+
+- API -- this stands for "applicaton programming interface" -- examples
+    of this are "push" and "pop"
+
+- LIFO: last in, first out -- this means that the last thing that was
+    placed onto a stack is the first thing that leaves the stack. So it's
+    similar to stacks of trays in a cafeteria.
+
+- FIFO: first in, first out -- this is the reverse of a LIFO, where as
+    opposed to having the last in, first out, the order of execution
+    follows "first in, first out". This is also known as a "queue". It's
+    similar to the above examples except that it needs a little more
+    information -- you have to know where the "front" of the data is
+    located at. You could implement this concept as follows:
+
+        typedef struct
+        {
+            int front;
+            int numbers[CAPACITY];
+            int size;
+        }
+        queue;
+
+    ... this essentially allows you to find the next value that is
+    located at the first location in the array and work with that, as
+    opposed to moving every element in the array 1 byte/element/whatever
+    forward and dealing with that -- it goes to the first element --
+    needs clarification
+
+    ... another dynamic example might look like this:
+
+        typedef struct
+        {
+            int front;
+            int *numbers;
+            int size;
+        }
+        queue;
+
+BINARY TREE STRUCTURES
+---------------------------------------------------------------------
+- A tree is comprised of three basic elements: root, parent, and
+    children. Each of these elements is essentially a node. The root
+    node will have pointers to other nodes, but no pointers to itself.
+    Parents will have both pointers coming from other nodes, and
+    pointers going out to other nodes. Children will have pointers
+    coming from other nodes, but no pointers to other nodes. For
+    example:
+
+                                  -----> child
+                                  |
+                -----> parent -----
+                |                 |
+        root ----                 -----> child
+                |
+                -----> parent -----> child
+
+- A binary tree structure has a maximum of 2 pointers going from one
+    node to another, so that at any given node there are a maximum of
+    2 other linked nodes
+
+- A binary search tree is very "searchable" because of a special
+    property -- at each node there are only 2 other nodes, maximum,
+    that can be pointed to. For example:
+
+                        55
+                        |
+                    ---------
+                    |       |
+            ------- 33      66-------
+            |       |       |       |
+            22      44      77      88
+
+    ... in this example, the left child is smaller and the right is
+    larger at every node. It's sort of a recursive definition -- it's
+    true at every node.
+
+    ... so, suppose you wanted to search for the number 22. The
+    initial pointer would point to 55, which is the root. Since 22 is
+    less than 55, you'd move to the next level, 33 and 66. You'd go to
+    33. Then you'd evaluate 22 and 44, and go to 22.
+
+    ... this sort of binary search would have a search time of O(log n)
+
+- You could implement a binary search tree with something like this:
+
+        typedef struct node
+        {
+            int n;
+            struct node *left;
+            struct node *right;
+        }
+        node;
+
+    ... so in this example, struct node *left ande *right are
+    recursively calling the structure "node", but more specifically,
+    can be used to go to the "left" or the "right".
+
+    ... once you get to the "leaves" of the tree, or the "children",
+    their left and right values will be NULL
+
+- This could be an implementation of a binary search tree function that,
+    given the root of the tree, finds for you true or false whether or
+    not something is in it.
+
+        bool search(int n, node *tree)
+        {
+            if (tree == NULL) // this is just a check
+            {
+                return false;
+            }
+            else if (n < tree -> n) // this is the interesting part
+            {
+                return search(n, tree -> left);
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+
+    ... so the idea is to search for an integer "n" in the *tree, which
+    is comprised of "nodes" -- a datatype that we defined. *tree in this
+    example is a pointer to the root.
+
+    ... so what this is saying is that if "n" is less than the current
+    value of "n" in the tree (tree -> n just means to go to the value
+    of n), then recursively return the same function but point to the
+    left value, which essentially points to the left-half of the tree
+
+    ... the same goes if "n" is greater than the current node -- in this
+    case, just go right
+
+    ... the last case is if "n" equals the value of the current node --
+    then you've found your value
+
+- So binary search tree, like binary search, runs at O(log n)
+
+- However, it is possible to get a search to run at constant time, or
+    O(1) -- which is interesting, because when you add data to a linked
+    list, if you don't care about sorting, you just add it to the
+    beginning and it runs at O(1) time. But it's also possible to
+    perform a search at 0(1) time using "hashing".
+
+HASHING
+---------------------------------------------------------------------
+- This is a form of sorting that combines a few other methods of
+    sorting -- similar to having a bluebook stack, and just separating
+    data into groups, or "buckets", that aren't exactly sorted, but it
+    brings you a little bit closer to a fully-sorted list.
+
+- So, "hashing" is taking something from input, analyzing it, and making
+    some general decision on what to do with it -- do you sort it by
+    A thru M and N thru Z? Or A thru S, and T thru Z? Whatever you want
+
+- Once you've decided to do something with the input value, you output
+    a "hash value".
+
+- So, how do you use hashing to get to the "holy grail" of runtime, or
+    constant time?
+
+- Let's say you were adding a bunch of names to an array in memory, and
+    you wanted to alphabetize them. The first name is "Alice", so you
+    put it at the top. The second name is "Bob" so you put it in the
+    second slot. The third name is "Brendan", which should go in the
+    second slot, but it's already taken, so you put it in the third
+    slot instead. Brendan "hashes" to the same value as "Bob", but
+    there's not a lot you can do. So this kind of thing keeps going,
+    and searching for where to put someone is called "linear probing".
+
+- A "hash table" comes close to this -- not with linear probing, but
+    with "separate chaining", whereby your data table is technically
+    an array, but also a linked list. For example:
+
+        1 -- data
+
+        2 -- data -- data
+
+                 /-- data
+        3 -- data
+                 \-- data
+
+        4
+
+        5 -- data
+
+    ... this combines elements of an array and a linked list, where the
+    array would be the indecies 1 through 5, and the linked list is all
+    of the data that follows to the right-hand side
+
+- The end result is that these data structures can go both vertically and
+    horizontally -- or up and right -- or whatever, it can sort of grow
+    in 2 dimensions
+
+- This allows you to sort of "hone in" on where a person is using 1
+    characteristic -- for example, an array-linked-list combo where the
+    "buckets" are birthdays, if you're looking for someone who was born
+    in January then you have already narrowed your search to 1 month
+    out of 12. Another way to describe this is that you deterministically
+    know where that person will be -- there may be a lot of people in
+    the linked-list that is January, but you know that the person that
+    you are looking for will be there.
+
+- As an aside, in this model it would be ideal if most of the "chains"
+    that go to the right of the array "buckets" were mostly uniform in
+    length, since your search goes down each one of these chains. If the
+    chains are not relatively uniform, that means that there's an
+    opportunity to optimize the structure in an attempt to get all of
+    the chains uniform, more or less, and an opportunity for better
+    design
+
+ TRIE
+ ---------------------------------------------------------------------
+ - This is one of the most sophisticated data structures in C, though it
+    does take up a lot of memory. It allows you to search in constant
+    time -- so, unlike linear search which runs at O(n), or binary
+    search which runs at O(log n), this allows you to search potentially
+    much more quickly, in O(1).
+
+- This data structure is a tree known as a "trie" -- which is like an
+    excerpt from "retrieval", anyways it's a weird name because "trie" is
+    pronounced "try", and not "tree".
+
+- Each of the nodes in a trie are an array themselves, although
+    technically they're a structure with a little more stuff inside of
+    them
+
+- Each array (or node) in a trie is filled with pointers to another
+    such array
+
+- The way to store words in a trie is not with characters, but with
+    pointers
+
+- So for example, if you were to search for "Maxwell" in one of these
+    structres then what would happen is you would find the array that
+    contains "M", from there it would point to another array that
+    contains "a", and from there on to "x" and so on.
+
+- So you would "hash into" the trie with the first letter "M", which is
+    the 13th element in the first array (out of 26 elements of the
+    letters of the alphabet). So you would then hash on the second
+    letter, third letter, etc. with each new array being of size 26,
+    so it does use a bunch of memory.
+
+- At the end of the search there's usually a delta symbol, or some kind
+    of symbol to let you know you've reached he end of the search.
+
+- So the amount of time it takes to search for something using this type
+    of data structure is constant and invariant -- it all depends on the
+    length of the name you're searching for, and is not affected by the
+    size of the dataset or how may other names may be stored.

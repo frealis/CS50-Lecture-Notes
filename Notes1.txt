@@ -1,0 +1,1045 @@
+-   pset1, pset2, pset 3    -----------------------------------------
+
+OVERVIEW
+---------------------------------------------------------------------
+- The general order of events in "programming" follows:
+
+        Source code > Compiler > Machine code.
+
+    ...in pset1, the source code is written in C.
+
+- The compiler is sort of program by itself, and the way it works can
+    be broken down as follows:
+
+    1. Pre-processing: all libraries, or header files, are insered
+        into the source code. So, any header file referenced by #include
+        <file_name.h> gets replaced by actual code that is hidden
+        somewhere that some other dude wrote. For example, in "hello
+        world", the standard input/output header file (ie. stdio.h)
+        is included (ie. #include <stdio.h>) and the file itself
+        references printf(). Once the pre-processor copies the contents
+        of stdio.h to the source code, the printf() function will
+        basically come into existence.
+
+    2. Compiling: this step converts 'source code' into 'assembly
+        code'. Assembly code is really close to machine language, or
+        binary, but not quite...it's somewhere between source code
+        (in this case, C) and binary (a bunch of 0's and 1's).
+
+    3. Assembling: this steps converts 'assembly code' into 'machine
+        code'. This is where the 0's and 1's get created.
+
+    4. Linking: this adds in libraries/headers to the source code
+        from the pre-processing step, so...it seems like the original
+        source code goes straight to compiling, then asembling, and
+        afterwards anything that is #included gets pre-processed, and
+        then linked or appended to produce even more 0's and 1's.
+
+- When a header file is added to source code using #include, it has
+    to also be explicitly mentioned in the command line with the
+    command to compile. In C, the command is 'clang', and header
+    files are 'linked' to the source code using -l (L, not 1). So for
+    example, to link cs50.h to a file, the compilation command would
+    look something like:
+
+        $ clang hello.c -lcs50
+
+- By default, when a *.c file is compiled, the machine code gets
+    named to a.out, b.out, c.out by default; you can rename them at
+    the command line by using -o (O is for output). For example:
+
+        $ clang -o hello hello.c
+
+    ...would compile hello.c and rename it to simply 'hello' instead
+    of a.out.
+
+- The CS50 course also has some built-in commands:
+
+    > help50 -- acts as a debugger, highlights errors and gives more
+        description as to why the error may have occurred.
+        Syntax: help50 hello.c
+
+    > debug50 -- similar to help50, but highlights errors in the actual
+        source code as opposed to the output in the terminal window.
+
+    > check50 -- checks whether a file meets the specifications or
+        requirements of the project.
+        Syntax: check50 cs50/2017/fall/hello
+
+    > style50 -- checks to see whether code is 'styled' nicely, ie.
+        does it have appropriate indentations.
+        Syntax: style50 hello.c
+
+    > eprintf() -- used as a diagnostic tool, you can use it to print
+        a custom message that will also show the line that this
+        custom message is on in the source code. It's almost like
+        using comments in source code, except it is displayed in the
+        output, which can be nice.
+        Syntax: eprintf("custom message")
+        Output: hello.c:10: custom message
+
+- From the command line, you can use man (short for 'manual') to look
+    up information about commands, ie. man ls will display information
+    about the ls command (the list command). Another good reference
+    is on the cs50 website: https://reference.cs50.net/. Also, there is
+    a "Less Comfortable" checkbox in the upper-righthand corner that
+    switches between man (manual) documents, and more user-friendly
+    explanations.
+
+VARIABLES
+---------------------------------------------------------------------
+- In C, when variables are used you have to consider the 'scope' in
+    which they are used. The 'scope' is usually thought of, 'within
+    the curly braces { }'. For example, in a DO / WHILE loop, if a
+    variable is declared within the curly braces { } but later used
+    as part of the WHILE condition, the computer won't recognize the
+    variable (I guess the WHILE condition is evaluated prior to
+    anything within the curly braces). To get around this, you can
+    declare the variable outside of the scope of the { }, yet still
+    use the variable within the { } later on. The idea I guess is
+    that you have to let C know that the variable n exists, and once
+    it knows that then it can use it later on, no matter what the
+    value is. For example:
+
+        int n;
+        do
+        {
+            n = get_int("Positive number: ");
+        }
+        while (n <= 0);
+
+    ...so with this example, int n declares the variable first. Later
+    on, 'n' is used within the { } braces. It is lastly used to
+    evaluate the WHILE condition. The purpose of a DO / WHILE loop is
+    to execute code at least once -- if the condition is met, then
+    the loop will continue to execute. In this case, WHILE n <= 0
+    (ie. if 'n' is a negative number), the loop will continue to
+    prompt the user for a positive number via:
+
+        n = get_int("Positive number: ")
+
+    You can also accomplish this  with just simply a WHILE loop,
+    for example:
+
+        int n;
+        while (n <= 0)
+        {
+            n = get_int("Positive number: ");
+        }
+
+    ...in this case, you have solved the problem in the previous case
+    by declaring the variable 'n' outside of the inner curly braces,
+    so that it can later be used in the WHILE loop. However, the sort
+    of secret here is that when 'n' is declared, it is given a trash
+    value, some random value that the computer may give it depending
+    on what's available in the RAM. So in this code, when C evaluates
+    the WHILE condition for the first time, the number could be
+    positive or negative and you may be unintended results -- it may
+    not prompt the user for a positive number input at all. You can
+    get around it using a 'hack', for example:
+
+        int n = -10;
+        while (n <= 0)
+        {
+            n = get_int("Positive number: ");
+        }
+
+    ...so the workaround here is to set 'n' to -10 to start off with,
+    which will get the code to work, but it's sort of considered a
+    'hack'. These types of solutions are considered 'inelegant' and
+    horrible design, because n = -10 just seems so random.
+
+ARRAYS
+---------------------------------------------------------------------
+- An array is a contiguous chunk of memory, literally stuff stored
+    back-to-back-to-back typically in the RAM. It can be multiple
+    characters, strings, int's, etc.
+
+- Each element in an array has an index. Characters, integers, whatever
+    else have a set about of bits (or bytes) allocated to be stored.
+    Even boolean values, which can only be true or false (0 or 1), take
+    up a byte of memory (8 bits) instead of 1 bit of memory, for the
+    sake of convenience that someone else decided awhile ago. Anyways.
+    The difference is that strings can take up a variable about of
+    bits/bytes, and have a null terminator (ie. /0) but either way,
+    whether dealing with integers, strings, or whatever, when they
+    are inserted into an array they get an index number. This index
+    system starts with 0 and counts up by 1 (aka, 0-indexed) and can be
+    used to identify each individual element/value in an array.
+
+- Because of how elements in an array are indexed (ie. the first value
+    has an index of 0, the second value has an index of 1, etc.) the
+    last element in an array has an index of n - 1, where n is the total
+    number of elements.
+
+- An array declaration takes the following form:
+
+        type name[size];
+
+    ...where 'type' determines the kind of variable that can be stored in
+    the array, 'name' is the name of the array, and 'size' is how many
+    elements (measured in bytes) you would like each entry in the array
+    to contain. This is similar to declaring a variable, the only
+    difference is including the 'size' parameter.
+
+- So for example, if you wanted to create an array that contained
+    people's initials, ie. "MHH", you might write something like this:
+
+        char initials[4];
+
+    ...this would create an array consisting of char's, the name of the
+    array would be "initials", and each entry in the array would contain
+    up to 4 elements -- 3 elements, or bytes, would store a 3-letter
+    initial, and the 4th element would store the null terminator /0.
+
+- You can both declare and initialize an array simultaneously, that is,
+    you can declare it and add values to the array at the same time. It's
+    not practical for fpr huge ass arrays, but for small arrays it may be
+    convenient. A special syntax, called 'instantiation syntax', would
+    appear as follows:
+
+        type name[size] = {value 1, value 2, value 3, etc.};
+
+    ...you can also use 'individual element syntax' as follows:
+
+        type name[size];
+        name[0] = value 1;
+        name[1] = value 2;
+        name[2] = value 3;
+        etc.
+
+- There is a special case with 'instantiation syntax' that allows you to
+    create the array -without- specifying the size. The compiler will kinda
+    automatically figure it out. For example:
+
+        type name[] = {value 1, value 2, value 3, etc.};
+
+    ...will work as above, while omitting the 'size' parameter.
+
+- Here's a crazy thing -- arrays can consist of more than a single
+    dimension. You can have as many size specifiers as you wish. For
+    example, you could create something that resembles a 10 x 10 grid
+    of cells using an array as follows:
+
+        bool battleship[10][10];
+
+    ...where 'bool' is just a 'type', like 'int' or 'string', that only
+    returns TRUE or FALSE. You could use anything though. You can use int
+    if you want. Anyways. In memory, this is really just a 100-element
+    one-dimensional array, because of the way that memory is stored in RAM
+    (ie, one sequence of values followed by another). These sort of
+    multi-dimensional arrays are great -abstractions- to help visualize
+    game boards or other complex representations.
+
+- As mentioned before, each element of an array can be treated as a
+    variable. However, in C we can't treat entire arrays themselves as
+    variables. For example, you can't assign one array to another array
+    using the assigment operator (ie. ==). Instead, you must use a loop
+    to copy over each element in an array one-at-a-time. For example:
+
+        int foo[5] = {1, 2, 3, 4, 5};
+        int bar[5];
+
+        for (int j = 0; j < 5; j++)
+        {
+            bar[j] = foo[j];
+        }
+
+    ...would, starting with j = 0, assign bar[0] = foo[0], then in the
+    next loop where j = 1, assign bar[1] = foo[1], etc., until the loop
+    has completed 5 times (0 to < 5 is 5 loops).
+
+- In some of the more modern languages, you can actually assign all of the
+    values of an array into another array more simply, but in C it's not
+    possible (unfortunately).
+
+- In C, local variables are 'passed by value' (this is explained in the
+    VARIABLES by SCOPE section) from a -caller-, ie. main(), to a -callee-,
+    ie. add(). In this example, main() would take some variables and pass
+    them to add() by their value, but not the actual variables themselves.
+    The add() function would then do something with these values, or
+    copies, and send them back to main(). Arrays don't follow this rule,
+    they are 'passed by reference'.
+
+- Pass by reference -- the callee, ex. add(), actually -does- receive the
+    array, and not just a copy of it. So in short, when a function sends
+    information to another function, it passes values; when an array
+    sends information to another array, it passes everything (aka, pass
+    by reference). So when the elements, or variables, of a function
+    are sent to another function, the original variables are left intact.
+    However, when the elements of an array in a function are sent to
+    another function, what happens?
+
+FUNCTIONS
+---------------------------------------------------------------------
+- In C, int main() seems to be required one way or another in order for a
+    program to work. In most of the examples so far, int main(void) is a
+    function that takes no arguments (hence 'void') but returns an integer
+    value. For some reason, it has to always return an int.
+
+- Other functions can be created using the syntax:
+
+        data_type function_name(arg_type1 arg1, arg_type2 arg2, etc.)
+
+    ...and there are 2 ways to create functions -- they an simply be
+    'declared', or they can be 'defined'. To 'declare' a function, simply
+    write something like this:
+
+        int add(int x, int y);
+
+    ...the function add() will be declared, but it doesn't do anything. To
+    'define' the function, you -could- do something like this:
+
+        int add(int a, int b)
+        {
+            int sum = a + b;
+            return sum;
+        }
+
+    ...which will 'define' a function named add(), that takes two arguments
+    named 'x' and 'y'. The function states that these arguments must be
+    integers. The function then creates another integer, 'sum', which is
+    assigned a value == x + y. The value of 'sum' is 'returned' in whatever
+    format was initially specified -- in this case, the first part of the
+    function "int add(..." specifies that whatever value is returned by this
+    function must be an integer. You could use a string or whatever else in
+    this spot, but the operations performed within the curly braces { }
+    would have to output, or 'return' whatever was initially required.
+
+- In order for 'clang' to work and compile a program, there has to be
+    an int main() function somewhere within the *.c file. Other functions
+    can be created as well, but the int main() function is necessary. It
+    is within int main() that other functions can be used, or 'called'.
+    To do so might look like this:
+
+        int main(void)
+        {
+            int x = get_int("Enter the 1st number to add: ");
+            int y = get_int("Enter the 2nd number to add: ");
+            int sum_xy = add(x, y);
+            .
+            .
+            .
+        }
+
+    ...where the add() function is called, and specifies that it needs
+    two arguments, 'x' and 'y', and whatever value is returned from this
+    function will be stored in sum_xy as an integer.
+
+VARIABLES and SCOPE
+---------------------------------------------------------------------
+- When working with functions, 'scope' is a characteristic of a variable
+    that defines from which functions that variable can be accessed. There
+    are two primary types of scope in C -- local variables, and global
+    variables.
+
+- Local variables -- can only be accessed within the functions in which
+    they are created. For example, using the scenario from the FUNCTIONS
+    section located above:
+
+        int add(int a, int b)
+        {
+            int sum = a + b;
+            return sum;
+        }
+
+        int main(void)
+        {
+            int x = get_int("Enter the 1st number to add: ");
+            int y = get_int("Enter the 2nd number to add: ");
+            int sum_xy = add(x, y);
+            .
+            .
+            .
+        }
+
+    ...there are two functions, add() and main(). The variables 'a' and
+    'b' located within the add() function can only be access within that
+    function; the main() function cannot access them. In fact, you could
+    re-define and use the same name of those variables later within the
+    main function, and while they would look the same, they would
+    potentially be totally different. Likewise with the add() function,
+    it cannot access the 'x' or 'y' variables located within main().
+
+- Global variables -- can be accessed by any function in the program. The
+    reason for this is that they are not created inside of any particular
+    function. For example:
+
+        int z = 0;
+
+        int add(int a, int b)
+        {
+            int sum = a + b;
+            return sum;
+        }
+
+        int main(void)
+        {
+            int x = get_int("Enter the 1st number to add: ");
+            int y = get_int("Enter the 2nd number to add: ");
+            int sum_xy = add(x, y);
+            .
+            .
+            .
+        }
+
+    ...there is the add() function that includes variables 'a' and 'b',
+    there is the main() function that includes variables 'x' and 'y',
+    but there is also the variable 'z' which is not included within any
+    function. In this case, it could potentially be used by either the
+    add() function or main() function if you wanted to.
+
+- This is an example that uses a global variable in two separate functions:
+
+        float global = 5;
+
+        void triple(void)
+        {
+            global *= 3;
+        }
+
+        int main(void)
+        {
+            triple();
+            printf("%f\n", global);
+        }
+
+    ...this example is interesting because, while the 'global' variable
+    appears in both the 'triple' and main() functions, it is first used
+    in the 'triple' function. This function accepts no arguments, and
+    returns (void), but it still performs an operation on the variable
+    'global' -- it multiplies it by 3. The main() function calls the
+    'triple' function with no arguments (because 'triple' can't take any
+    arguments anyways) and the result of its "black box" operation, even
+    though the function 'triple' never mentions a 'return' line, and its
+    return value type is set to (void). Weird. Anyways, once the operation
+    in 'triple' is performed, it is called by main() and eventually
+    printed using printf().
+
+- It is for this reason that using global variables can result in
+    unpredictable behavior -- it may be used by one function, changed into
+    something, and then used by another. I'm not sure in which order
+    global variables get used or how it's determined.
+
+- One of the main distinctions between local and global variables is that
+    local variables in C are 'passed by value' in function calls. When a
+    variable is 'passed by value', the -callee-, or the function that
+    receives the variable, gets the value of the variable and not the
+    variable itself. It's like getting a photocopy of a prescription. In
+    the example:
+
+        int add(int a, int b)
+        {
+            int sum = a + b;
+            return sum;
+        }
+
+        int main(void)
+        {
+            int x = get_int("Enter the 1st number to add: ");
+            int y = get_int("Enter the 2nd number to add: ");
+            int sum_xy = add(x, y);
+            .
+            .
+            .
+        }
+
+    ...the function add() is the -callee- because it received a copy of
+    variables 'x' and 'y' from main() -- in this case, it receives 'x' as
+    'int a', and 'y' as 'int b'. This means that 'x' and 'y', which were
+    specified by input from the user, remain unchanged. However, you can
+    override that and change them if you want. For example, if you changed
+    main() to read:
+
+        int main(void)
+        {
+            int x = get_int("Enter the 1st number to add: ");
+            int y = get_int("Enter the 2nd number to add: ");
+            int x = add(x, y);
+            .
+            .
+            .
+        }
+
+    ...then after the user inputs 'x' and 'y', it gets passed to add(),
+    which performs the operation x + y and returns that value, but then
+    it will re-assign 'x' to x + y. Which is strange, I don't know why
+    you'd want to do that, but the point is that the -callee- receives
+    a "photocopy" of variables from the -caller-. Again, in this case,
+    add() is the -callee- and main() is the -caller-.
+
+- Things can get tricky if the same variable name appears in multiple
+    functions. It's important to make sure that these variables exist in
+    different scopes and don't influence each other.
+
+ARRAYS vs. VARIABLES
+---------------------------------------------------------------------
+- When main() calls another function that has an array, if there's
+    something in the 'black box' of that function that changes the values
+    in the array, then they also get changed in main(). This is the
+    concept of 'pass by reference' -- it's like anything in an array in
+    main() is changed by anything in an array in the other function that
+    was called. Basically, arrays in main() are soul-bound to arrays in
+    other functions, so long as main() calls those functions.
+
+- When main() calls another function that has a variable, if there's
+    something in the 'black box' of that function that changes the value
+    of a variable, it has no effect on main(). The function that was
+    called will only pass a 'copy' of whatever values it has stored in
+    its variable(s) back to main(), but the variables in main() them-
+    selves remain untouched. You can use a work-around by using the
+    assignment character, '=', which is described somewhere else in this
+    NOTES.txt file.
+
+COMMAND LINE ARGUMENTS
+---------------------------------------------------------------------
+- Command line arguments allow the user to provide information to the
+    program at run-time -- that is, at the command line. So like, instead
+    of running the program and waiting for a prompt later on, you can
+    type in a command to run the program and enter arguments right on
+    the same line that will be used later on in the code. It is basically
+    a way to collect more data at the command line, as opposed to later on.
+
+- The general function int main(void) generally assumes that:
+
+    > The main functions/programs will be returning an 'int', or
+    integer value.
+
+    > By default, 0 is the integer value that is returned.
+
+    > This value is returned automatically, and (void) implies that
+        the MAIN function takes no arguments at all.
+
+- However, MAIN can also take command-line input. So instead of saying
+    main(void), which executes whatever program within its { }
+    brackets -after- it is initialized, ie. ./hello, you can specify
+    arguments that MAIN can accept at the command line. The clang
+    command to compile a hello.c file is an example of this -- it can
+    take arguments like -o, or -lcs50, etc.
+
+- Main can take input (and not necessarily input in the sense
+    of get_int(), get_string(), etc.) that can be supplied at the
+    command line. An example of this alternative version of main, for
+    example, would be:
+
+        int main(int argc, string argv[])
+
+    ...in this example, MAIN can take two inputs: an integer, and an
+    -array- of strings. It's strange to think of the first type of
+    input, int argc, as taking integers, but since C considers
+    characters as basically a string of integers (per ASCII) I guess
+    that's how it works. Anyways, int argc represents the total
+    number of words that the human has typed at their keyboard. The
+    string argv[] (which stands for string argument vector) is an
+    array of words typed at the prompt before hitting enter.
+
+- In a nutshell, int main(int argc, string argv[]) enable you to know
+    what data the user provided at the command line and how much data
+    they provided. The convention is to use argc to represent "argument
+    count" and argv to represent "argument vector", but you could name
+    them whatever you want.
+
+- So argc (argument count) is an integer-type variable that will store the
+    -number- of command-line arguments that the user typed with the
+    program was executed.
+
+- And argv (argument vector) is an array of strings that stores, one
+    string per element, the actual text the user typed at the command-line
+    when the program was executed. The first element of argv is always
+    found at argv[0]. The last element of argv is always found at
+    argv[argc - 1].
+
+- Even if integers are entered at the command-line, they are stored as
+    strings in argv[]. There has to be a conversion from string-to-integer
+    if you want to actually use the integer value, which is covered in
+    the caesar.c exercise (I think, I'm drunk) but it's called something
+    like atoi().
+
+MAGIC NUMBERS, or HEADER FILES, or LIBRARIES
+---------------------------------------------------------------------
+- C provides a -preprocessor directive- (also called a 'macro') for
+    creating 'symbolic constants'. The basic format is as follows:
+
+        #define NAME REPLACEMENT
+
+    ...at the time your program is compiled, #define goes through your
+    code and replaces NAME with REPLACEMENT. So like, if #include is
+    similar to copy/paste, then #define is analogous to find/replace.
+
+- Anyways, the basic syntax to include a library is #include <library.h>,
+    which is a similar concept.
+
+- But, you could also do something like #define PI 3.14159265, and if you
+    did that then apparently what would happen is the hashtag #define
+    would go through all of your code and replace all instances of 'PI'
+    with 3.14159265.
+
+- You can also use #define to strings, for example:
+
+        #define COURSE "CS50"
+
+    ...would replace all instances of COURSE with CS50. Also, it's not
+    necessary to capitalize
+
+ALGORITHMS
+---------------------------------------------------------------------
+- In RAM chips, strings, integers, etc. are stored in particular locations
+    and in order to be accessed, they have to have specific addresses.
+    The locations themselves tend to be black chips on a green circuit
+    board. These chips can be thought of simply as regtangles that can
+    be divided up into a grid, with each box being one byte, then another
+    byte (or 8 bits), etc. These bytes can have specific locations, or
+    addresses, so the first byte may be byte 0, then byte 1, 2, etc.
+
+- When strings are stored, they are separated by the null terminator /0.
+    This is separate from a regular 0 (a regular 0 is actually a char, or
+    a character) in that it is actually eight 0 bits. So when /0 exists in
+    memory, it is actually eight 0 bits in a particular byte's location.
+
+- So anyways, let's say that you had an array of unsorted strings. If you
+    wanted to find a particular string, it would be difficult to come up
+    with a sort of algorithm to do that -- you'd have to try a "brute
+    force" method where you literally look at every string until you find
+    the one that you want. You may get lucky and find it in the first
+    place that is searched, or you may not find it until after searching
+    most, or all of the strings in the array.
+
+- If the strings were sorted alphabetically, you could maybe use a more
+    sensible algorithm, analogous to searching through a phonebook. For
+    example, let's say you've got an array that is alphabetized from A to
+    Z, and you're looking for "Smith". Lets say you start in the middle
+    of the array, called "name", and found "LeBron". Since name[] is
+    sorted from A to Z, you could then cut to somewhere halfway between
+    "LeBron" and 'Z' and maybe find "Thomas". From there, you could again
+    cut to somewhere halfway between "LeBron" and "Thomas" and get "Opie".
+    And then search from "Opie" to "Thomas", etc., until you finally find
+    "Smith".
+
+- There are a couple of ways to search the entries, or elements (not sure
+    which word to use) of an array:
+
+    > Linear search: start from the beginning of the array and search
+    each entry until you reach the end of the array, or vice-versa. The
+    pseudo-code for such a search might appear as follows:
+
+        for each element in an array
+            if element you're looking for
+                return true
+        return false
+
+    ...so this would look at each element in the array, and if it meets
+    the criteria in the IF statement then return true. If the element is
+    not in the array at all, then at the end of the FOR loop return false.
+
+    > Binary search: start in the middle of a -sorted- array, look at that
+    element. If it's not what you're looking for, cut the array in half at
+    that point, into a left-half and a right half. Look at the middle
+    element in the left-half of the array. If it is not the element that
+    you're looking for, but the element is contained somewhere within the
+    left-half (which you would know because the elements are sorted) then
+    cut the left-half into 2 halves. If the element is -not- in the left-
+    half of the array, then use this process on the right-half instead.
+    Keep dividing the data in half until you narrow in on the element that
+    you're looking for. This is sort of like the mentality behind "divide
+    and conquer". Some pseudo-code may look like this:
+
+        look at middle of sorted array
+        if element you're looking for
+            return true
+        else if element is to left
+            search left half of array
+        else if element is to right
+            search right half of array
+        else
+            return false
+
+    ...a binary search will -only- work if the array has been sorted. So,
+    while it is more efficient/faster at searching than using a linear
+    search, when combined with the time it takes to sort an array ahead
+    of time it may actually not always be the best solution.
+
+- There are a few ways to sort data as well:
+
+    > Insertion sort: take an element, compare it to any/all existing
+    elements in an array, and "insert" the element where it needs to go.
+    For example, if you're sorting numerically and you have an array
+    consisting of {7, 3, 9, 2, 3}, the process would look as follows:
+
+        {7, 3, 9, 2, 8} - start
+        {3, 7, 9, 2, 8} - swap 7 & 3, leave 7 & 9 alone
+        {3, 7, 2, 9, 8} - swap 9 & 2
+        {3, 2, 7, 9, 8} - swap 7 & 2
+        {2, 3, 7, 9, 8} - swap 3 & 2
+        ...
+
+    ...some pseudo-code may look like this:
+
+        for i from 1 to (n - 1)
+            call 0'th through i-1'th elements the "sorted side"
+            remove i'th element
+            insert it into sorted side in order
+
+    ...so basically, the lower numbers start to get sorted on the
+    left-hand side of the array.
+
+    > Bubble sort: compare two elements in an array at a time. For
+    example, with the array of {19, 2, 8, 4, 10, 1, 13} you would look at
+    the first two elements, 19 and 2. If you were sorting
+    smallest-to-highest, they would be swapped and the array would look
+    like {2, 19, 8, 4, 10, 1, 13}. Next, look at the 2nd and 3rd elements,
+    19 and 8. You would again swap them. You would repeat this until you
+    got to the end of the array, and if the array was still not sorted
+    then you would keep repeating this process, starting from the first
+    element, over and over until the entire thing was sorted. So the idea
+    is that the elements that go towards the beginning or end of an
+    array sort of "bubble up" to their respective ends through multiple
+    iterations. Specifically, for example, in an array sorted smallest-to-
+    highest, the largest number would get shuffled to the end of the
+    array. All other numbers (which are, obviously, smaller than the
+    largest number) would shuffle towards the beginning; however, the
+    smallest number in the entire array may or may not get to the first
+    spot, or array[0], just yet, although it will eventually.
+
+        repeat until no swaps
+            for i from 0 to (n - 2)
+                if i'th and i+1'th elements out of order
+                    swap them
+
+    ...where 'i' represents iterations through the FOR loop, and 'n'
+    represents the number of elements in an array. 'Swap' represents a
+    function that changes the location of any two elements in an array --
+    specifically, an element at the i'th location, and the one next to it
+    at the i+1'th location. Since the array is 0-indexed, the location, or
+    address of each element in the array is n - 1 (so if the array only
+    had 1 element, it's location would be 1 - 1 = 0, or array[0], and the
+    same goes for 2 elements with 2 - 1 = 1, or array[1], etc.). So in the
+    pseudo-code above, the FOR loop goes from i = 0 to i = (n - 2) because
+    once the FOR statement gets to the second-to-last element in the array,
+    which is (n - 2), the IF statement compares that element to the
+    actual last element in the array, (n - 1), because IF compares the i'th
+    and the i+1'th elements.
+    ...bubble sort and insertion sort will organize the data through
+    different methods -- bubble sort tends to put data in order on the
+    right to start off with, and insertion sort tends to start by putting
+    data in order on the left.
+
+    > Selection sort: search the entire array for the lowest number (if
+    sorting from lowest-to-highest) and put it at array[0]. Search the
+    entire array again for the second-lowest number, and put it at
+    array[1], etc. until all elements are sorted. Pseudo-code might look
+    something like this:
+
+        for i from 0 to (n - 1)
+            find smallest element between i'th and n-1'th
+            swap smallest element with i'th element
+
+    > Merge sort: this uses recursion to sort elements in an array -- it
+    is a function that calls itself.
+
+        on input of n elements
+            if n < 2
+                return
+            else
+                sort left half of elements
+                sort right half of elements
+                merge sorted halves
+
+    ...in the case that IF n < 2, that means that the list to be sorted
+    either has 0 or 1 element, and there's really no work to be done.
+    ...in the case that IF n > 2, the function will keep calling itself
+    and dividing the elements in the array into groups, the left-half and
+    the right-half. For example, in the array {4, 2, 7, 5, 6, 8, 3, 1}
+    the first division, focusing on the left-half and evaluating each
+    element from left-to-right, would appear something like this:
+
+        {4, 2, 7, 5, 6, 8, 3, 1}
+        [4, 2, 7, 5]    ignore: [6, 8, 3, 1]
+
+    ...the second divison, again focusing on the left-half, would look like
+    this:
+
+        {4, 2, 7, 5, 6, 8, 3, 1}
+        [4, 2]          ignore: [7, 5]
+
+    ...the third division would look like:
+
+        {4, 2, 7, 5, 6, 8, 3, 1}
+        [4]             ignore: [2]
+
+    ...at which point the function would look at IF n < 2, and it is
+    because now the group on the left, [4], contains only 1 element,
+    and it would simply return. So if you rewind 1 step:
+
+        {4, 2, 7, 5, 6, 8, 3, 1}
+        [4, 2]
+
+    ...the 'merge' part of the function occurs once the program looks at
+    these two specific elements. At this point, it will look 4, and at 2,
+    and 'merge' them into this:
+
+        {4, 2, 7, 5, 6, 8, 3, 1}
+        [2, 4]
+
+    ...it then rewinds a step and looks at 7 and 5:
+
+        {4, 2, 7, 5, 6, 8, 3, 1}
+              [7, 5]
+        [2, 4]
+
+    ...it merges 7 and 5 in order:
+
+        {4, 2, 7, 5, 6, 8, 3, 1}
+              [5, 7]
+        [2, 4]
+
+    ...then it merges [2, 4] and [5, 7]:
+
+        {4, 2, 7, 5, 6, 8, 3, 1}
+        [2, 4, 5, 7]
+
+    ...then rewind all the way back and perform the same types of
+    processes on the right-half of the array and end up with this:
+        {4, 2, 7, 5, 6, 8, 3, 1}
+                    [1, 3, 6, 8]
+        [2, 4, 5, 7]
+
+    ...and merge them together:
+
+        {4, 2, 7, 5, 6, 8, 3, 1}
+        [1, 2, 3, 4, 5, 6, 7, 8]
+
+    ...and as it turns out, the "running time" formula for the merge
+    method of sorting is n * log(n), where log is base 2. So in this
+    example, log_2(8) = 3, meaning that to sort 8 elements using a
+    "merge" sort and recursion requires 3 merges. Where n * log(n) comes
+    into play, or specifically that first 'n' that gets multiplied by
+    log(n), is that before each merge the computer examines each
+    element in the array once -- so the program looks at each element in
+    the array, which is 8, and performs 3 merges -- so basically,
+    8 * 3 = 24 events occured. Another way of saying it is that 'n'
+    number of things were done 'log(n)' number of times.
+
+RUNNING TIME
+---------------------------------------------------------------------
+- So algorithms all have some sort of "running time" -- some require more
+    time to complete a particular problem than others.
+
+    > Bubble sort running time: algorithm, you're comparing pairs of
+    elements in an array, ie. array[0] compared to array[1], then
+    array[1] compared to array[2], etc. The total number of comparisons
+    the first time through the array would be (n - 1), so for example if
+    you have 8 elements in an array, then there would be 7 comparisons on
+    the first run-thru, after which the highest number (if sorting
+    numbers from lowest-to-highest) would appear at the end of the array.
+    On the second run-through, there would be (n - 2) comparisons, since
+    you wouldn't need to compare the very last element because it would
+    already be in its correct position. And for the third run-thru,
+    (n - 3) comparisons, etc. on down the line. A formulaic way of
+    expressing the total number of comparisons would be:
+
+        (n - 1) + (n - 2) + (n - 3) + ... + 1
+
+    ...a formula for this is series of numbers would be:
+
+        n(n - 1) / 2
+        (n^2 - n) / 2
+        (n^2 / 2) - (n / 2)
+
+    ...this shows that the factor on the left (n^2 / 2) is much larger
+    than the one on the right (n / 2). For example, if n = 1,000,000:
+
+        (1,000,000^2 / 2) - (1,000,000 / 2)
+        500,000,000,000 - 500,000
+        499,999,500,000
+
+    ...this shows that for large values of 'n', the factor on the right
+    hand side has comparitively little influence on the overall result of
+    the equation. In these cases, you can sort of ignore, or "throw away"
+    the right side of the formula and approximate the result as:
+
+        O(n^2)
+
+    ...which is kind of a way of saying that the algorithm "feels" like
+    n^2 -- you sort of ignore the right hand factor, and dividing by 2,
+    and all of that. Most computer scientists would describe this sort of
+    approximation as the "running time" of the algorithm. This is known as
+    "Big O" -- it only considers the term that contributes the most to
+    the number of steps needed to execute an algorithm. 'O' here stands
+    for "order", so O(n^2) is the order of n^2. This concept of "order"
+    refers to the upper-bound of the running time of an algorithm, so in
+    conversation you may hear something like "This algorithm is going to
+    take on the order of n^2 steps".
+
+- Big O: there are a lot of different examples of orders of algorithms in
+    terms of run time. These all approximate the maximum amount of time
+    that an algorithm may take to execute. Another way to phrase it is to
+    refer to it as the worst-case scenario. Some examples are:
+
+        > O(n^2)        - bubble sort, selection sort, insertion sort
+        > O(n log(n))   - merge sort
+        > O(n)          - linear search
+        > O(log(n))     - binary search (divide and conquer)
+        > O(constant)   - constant # of steps (ex. get_string)
+        ...
+
+- Omega: same concept as Big O, but instead it approximates the minimum
+    or shortest amount of time that an algorithm may take to execute, or
+    the lower-bound. It's also referred to as the best-case scenario.
+    So, you can use the same concept on all of the above equations:
+
+        > omega(n^2)        - selection sort
+        > omega(n log(n))   - merge sort
+        > omega(n)          - bubble sort, insertion sort, linear search
+        > omega(log(n))     - binary search (divide and conquer)
+        > omega(constant)   - constant # of steps (ex. get_string)
+        > omega(1)          - linear search, binary search
+        ...
+
+    ...so for example, omega(1) represents the minimum amount of steps
+    necessary to complete an algorithm. It could also very well be the
+    max number of steps, ie. get_string. However, in searches it is
+    theoretically possible to have a case where omega(1) is true -- if
+    when the search starts, it just happens to find what it's looking for
+    the first time it accesses the information in an array. But that's
+    just luck.
+    ...in the case of a bubble sort, the minimum number of steps would
+    be approximated as omega(n) (or more precisely, omega(n - 2)) because
+    you have to go through the entire array at least once, and complete
+    at least n (or n - 2) steps.
+
+- Theta: this is used when the upper-bound and lower-bound approximations
+    are the same, or O(expression) = omega(expression).
+
+- So for example, if you had a condition like:
+
+        if n < 2
+
+    ...the computer science way of expressing that as a formula would be:
+
+        T(n) = O(1), if n < 2
+
+    ...which is basically saying that T, or theta, is about equal to O(1),
+    or 1 step, as long as n < 2. You could make similar statements with
+    O(2), O(3), etc. or any fixed constant.
+
+- If you want to express the "running time" of the merge sort method, it
+    might look something like this:
+
+        T(n) = T(n / 2) + T(n / 2) + O(n), if n <= 2
+
+    ...which basically says that the time to sort an array of elements is
+    roughly equal to the time it takes to sort half of the elements (ie.
+    T(n / 2)), plus the time it takes to sort the other half of the
+    elements (ie. T(n / 2)), plus some time to inspect each element in
+    the array (ie. O(n)). So this series of numbers actually sums up to:
+
+        O(n * log(n))
+
+    ...using some complex math stuff that isn't really necessary to cover
+    right now.
+-
+
+RECURSION
+---------------------------------------------------------------------
+- Recursion is when a function calls itself. It's like definining a word
+    by using the same word in its own defintion. This is generally a bad
+    thing, but can be useful in certain circumstances. For example, in
+    the code:
+
+        int sigma(int m)
+        {
+            if (m <= 0) {return 0;}
+            else {return (m + sigma(m - 1));}
+        }
+
+    ...the functon 'sigma' may take a value, let's say 10, and call it 'm'.
+    If 'm' <= 0, basically nothing happens. Otherwise, if 'm' > 0, then
+    the function returns 10 + 9. The purpose of sigma is to sum all of the
+    integers up to, and including, 'm'. So in this case, with recursion,
+    the problem is sort of split into parts where it will solve part of
+    the problem at a time, sort of piece-meal. It's like saying "Take 10,
+    and add the summation of 9, or all integers between 0 and 9" and then
+    saying "Take 10 + 9, and add the summation of 8, or all integers
+    between 0 and 8" and continually doing this over and over.
+    ...here's another example where m = 3:
+
+    > sigma(3):                 // Result: 3 + sigma(2)
+        int sigma(int m)
+        {
+            if (m <= 0) {return 0;}
+            else
+            {
+                return (3 + sigma(2));
+            }
+        }
+
+    > sigma(2):                 // Result: 3 + 2 + sigma(1)
+        int sigma(int m)
+        {
+            if (m <= 0) {return 0;}
+            else
+            {
+                return (2 + sigma(1));
+            }
+        }
+
+    > sigma(1):                 // Result: 3 + 2 + 1 + sigma(0)
+        int sigma(int m)
+        {
+            if (m <= 0) {return 0;}
+            else
+            {
+                return (1 + sigma(0));
+            }
+        }
+
+- So in this example, the "base case" is if (m <= 0) {return 0;} -- this
+    ensures that the function is not called indefinitely. Recursion is
+    generally bad if it doesn't have a "base case".
+
+- ALl of the + signs in the above example don't execute immediately, if
+    they did then the first instance of the function might look crazy
+    like 3, then 3 + 2 = 5, then 5 + 3 + 2 = 10, etc. It's more like,
+    when someone looks in a mirror and they're holding a mirror -- you
+    keep getting the image back in a reflection, and then in the reflection
+    of the reflection, etc. So in this example, you add 3 + sigma(2),
+    but sigma(2) is like a smaller reflection of the same function.
+    Then you add 3 + 2 + sigma(1), etc.
+
+- Another example of using a recursive function uses factorial functions.
+    The factorial function (n!) is defined over all positive integers.
+    n! equals all the positive integers <= n, multiplied together. In
+    this example, the factorial function, fact(n), may sort of be
+    represented like this:
+
+        fact(1) = 1
+        fact(2) = 2 * 1
+        fact(3) = 3 * 2 * 1
+        fact(4) = 4 * 3 * 2 * 1
+        fact(5) = 5 * 4 * 3 * 2 * 1
+
+    ...is basically the same as this:
+
+        fact(1) = 1
+        fact(2) = 2 * fact(1)
+        fact(3) = 3 * fact(2)
+        fact(4) = 4 * fact(3)
+        fact(5) = 5 * fact(4)
+
+    ...and could be expressed like this:
+
+        fact(n) = n * fact(n - 1)
+
+    ...this idea allows you to recursively define the function.
+
+- Every recursive funtion has two cases that could pply, given any
+    input:
+
+    > Base case: when triggered, this will terminate the recursive
+    process
+
+    > Recursive case: this is where te recursion actually occurs
+
+- So, recursive functions sort of take a piece of a problem out in small
+    increments, and repeatedly call themselves to continually deal with
+    whatever remains, until nothing remains (or memory runs out).

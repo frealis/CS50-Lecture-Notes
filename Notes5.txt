@@ -1,0 +1,438 @@
+SQL
+------------------------------------------------------------------------
+- SQL (the Structured Query Language) is a programming language whose sole
+    purpose in life is to query a database
+
+- After creating a database, the next thing you'll want to do is to start
+    creating tables. As part of the process of creating a table, you'll be asked
+    to specify all of the columns in that table. Thereafter, all of your queries
+    will refer to rows of the table.
+
+- Similar to variable data types in C or python, like int, str, char, etc., each
+    column in a SQL table has a data type (many of which are similar or the
+    same as variable data types)
+
+- One notable difference is that, unlike in C, the char data type in SQL does
+    not refer to a single character. Rather, it is a fixed-length string. Note:
+    in most relational databases, including MySQL, you actually specify the
+    fixed-length as part of the type definition, ie. CHAR(10) -- any unused
+    memory is filled with NULL
+
+- A VARCHAR refers to a variable-length string. VARCHAR's also require you to
+    specify the -maximum- possible length of a string that could be stored in
+    that column, ie. VARCHAR(99)
+
+- There are like 20 different data types in SQL (maybe more) that can all be
+    reduced to 5 basic types, and their "type affinity" (like the 5 mother
+    sauces) will be one of the following:
+
+        > NULL
+        > INTEGER
+        > REAL
+        > TEXT
+        > BLOB (binary large object)
+
+- It's also important that one column be designated as the "primary key". This is
+    a unique column and enables rows of a table to be quickly identified. It is
+    also possible to establish a joint primary key -- a combination of two
+    columns that is always guaranteed to be unique. Note: when defining a column
+    to be used as the primary key, it's -usually- a good idea to have that
+    column's data type as an integer, although it's not a requirement. It's also
+    a good idea to set the column to auto-increment so that you don't have to
+    worry about assigning new keys everytime you enter new data (as a row) into
+    that table
+
+- SQL is a programming language, but its vocabulary is fairly limited. In CS50
+    we will primarily consider just four operations:
+
+        > INSERT
+            - INSERT INTO table (column(s)) VALUES (values(s))
+
+        > SELECT
+            - SELECT column(s) FROM table
+            - SELECT column(s) FROM table WHERE predicate/condition
+            - SELECT column(s) FROM table ORDER BY column
+            - SELECT column(s) FROM table_1 JOIN table_2 ON predicate/condition
+
+        > UPDATE
+            - UPDATE table SET col_1 = val_1, col_2 = val_2, etc. WHERE predicate/condition
+
+        > DELETE
+            - DELETE FROM table WHERE predicate/condition
+
+SQL in CS50 IDE
+------------------------------------------------------------------------
+- There are a few ways to talk to databases. phpLiteAdmin comes with the cs50
+    cloud9 IDE, and sqlite3 can be run from the command line.
+
+- To use phpLiteAdmin in this IDE, just create a file and 2x click it -- it will
+    automatically open the phpLiteAdmin GUI. The database file has to have the
+    extension *.db
+
+- To use sqlite3, just type sqlite3 and the name of the database at the command
+    line to enter the editor. For example, it might look something like this:
+
+        $ sqlite3 artists.db
+
+    ... this would open the database, or table, named "artists.db" From there you
+    can enter SQL commands to insert, modify, query, etc. (You can also create a
+    database in the same way -- for example, if artists.db did not exist and you
+    typed the above, it would create the artists.db table/database)
+
+-
+
+PYTHON with SQL
+------------------------------------------------------------------------
+- You can use Python to perform SQL queries. The syntax looks something like this:
+
+        db = SQL("sqlite:///example.db")
+
+    ... this gives you a variable, 'db', that allows you to "talk" to the
+    database named "example.db"
+
+- Another example:
+
+        from cs50 import SQL
+        db = SQL("sqlite:///lecture.db")
+
+        # query database for all aubums -- this is a "result set"
+        rows = db.execute("SELECT * FROM Album")
+
+        # for each album in database
+        for row in rows:
+
+            # print title of album
+            print(row["Title"])
+
+    ... so the steps are:
+
+        1. Python opens a SQLite database called "lecture.db" that's in the same
+            directory, and name it "db". This variable, "db", allows python to
+            talk to the database in code
+
+        2. The "rows" variable is created, and the query SELECT * FROM Albumn is
+            executed -- rows is a "result set", or an array/list of all of the
+            rows that match the query
+
+        3. A FOR loop iterates over "rows", calling each iteration "row". At
+            each iteration the idea is that it will print out that row's title
+
+        4. The print() function goes through row["Title"], which is a sort of
+            hash table or dictionary
+
+- Rows have a bunch of columns, and the syntax for indexing into those columns
+    is square-bracket notation, or [], which is a dictionary, or dict object in
+    python. Note that the execute function, ie. db.execute, will always return
+    an array/list
+
+- There's also a way to combine SQL queries with command-line arguments. The
+    execute method supports what are called "named placeholders" -- the syntax
+    is usually a colon followed by something else. For example:
+
+        :t
+
+    ... an example might look something like this (also don't forget to include
+    import sys):
+
+        import sys
+        from cs50 import SQL
+        db = SQL("sqlite:///lecture.db")
+
+        # query database for all aubums -- this is a "result set"
+        rows = db.execute("SELECT * FROM Album WHERE Title = :t", t=sys.argv[1])
+
+        # for each album in database
+        for row in rows:
+
+            # print title of album
+            print(row["Title"])
+
+    ... so in this case, :t is a "named placeholder", and t=sys.argv[1] will
+    take the first word (after the name of the python program itself) that
+    the human typed in at the command line. Basically, it plugs t=sys.argv[1]
+    into :t -- :t is sort of like a variable
+
+- The command line to execute this query, through python, with a command-line
+    code might look like this:
+
+        $ python lecture.py "A Soprano Inspired"
+
+    ... which would (hopefully) return the results of any rows with this title
+
+- Command-line arguments are potentially a source of for hackers to attack
+    programs. For example, if you had code like this:
+
+        rows = db.execute(f"SELECT * FROM Album WHERE Title {t=sys.argv[1]}")
+
+    ... and someone entered "A Soprano Inspired"; DELETE * FROM Album, they
+    could potentially delete the Album table. This is what's known as a SQL
+    injection attack
+
+- SQL injection attacks can be prevented by "sanitization" or "scrubbing" of
+    the input.
+
+PYTHON with HTML
+------------------------------------------------------------------------
+- Whenever there is a form submission via POST it can be retrieved:
+
+        HTML template               Python route
+   -------------------------------------------------------
+    <input name="name" .../>    request.form.get("name")
+
+- If an <input> in an HTML template is named, then that input can be requested
+    by python using the request.form.get() function in order to retrieve the
+    variable that was submitted from the form
+
+FLASK
+------------------------------------------------------------------------
+- It's pretty simple to get started using Flask within CS50 IDE. In general,
+    you start by making a python file and call it anything you want to (they
+    usually call it 'application.py'). The first line will be the following:
+
+        from flask import Flask
+
+    ... so flask is the name of a module, and Flask is the name of a function --
+    in particular, it's a class, and classes are typically indicated with a
+    capital letter
+
+- After importing Flask you would initialize it like this:
+
+        app = Flask(__name__)
+
+    ... so __name___ is just the name of the file, basically this is creating
+    a flask application based on whatever file this line of code appears in,
+    which is normally application.py -- in other words, it's creating a flask
+    application from the application.py file
+
+- From there, it's just a matter of writing functions that define the behavior
+of our application. Some examples may look like this:
+
+        def index():
+            return "You are at the index page!"
+
+        def sample():
+            return "You are on the sample page!"
+
+    ... in order to associate these functions with your website, you could do
+    something like this:
+
+        @app.route("/")
+        def index():
+            return "You are at the index page!"
+
+        @app.route("/sample")
+            return "You are on the sample page!"
+
+    ... this is called "applying a decorator". Basically what it means is that
+    if you go to the application's home page, which is / or index.html, or
+    nothing, it will show that you are at the index page. If however you go to
+    /sample, it will show you the sample page. So you're basically defining the
+    behavior that you want to appear with the flask application.
+
+- Flask "decorators" are used to associate a particular function with a
+    particular URL. They also have more elegant uses in python, but that goes
+    beyond the scope of CS50. Decorators actually aren't native to flask,
+    they're native to python.
+
+- There are 3 things that need to happen in order to run a Flask application
+    within CS50 IDE:
+
+        1.  export FLASK_APP=application.py
+        2.  export FLASK_DEBUG=1
+        3.  flask run
+
+        ... the flask app is a system variable, and it's going to be stored in
+        the memory of the IDE, so that if you ever run an application again it
+        knows exactly which application to run. The first 2 steps only need to
+        happen once; afterwards, whenever you want to run flask you just simply
+        type "flask run" in the command line
+
+- Data can be passed into flask via URLs, akin to using HTTP GET. For example:
+
+        @app.route("/show/<number>")
+        def show(number):
+            return "You passed in {}".format(number)
+
+    ... so if you visited ~/show/10, then you would pass 10 in as "number"
+
+- Data can also be passed into flask via HTML forms, as with HTTP POST, but we
+    need to indicate that Flask should respond to HTTP POST requests explicitly
+    -- in other words, the data can be passed in, but won't necessarily be used
+    or displayed unless the program does something with it. For example:
+
+        @app.route("/login", methods=['GET', 'POST'])
+        def login():
+            if not request.form.get("username")
+                return apology("must provide username")
+
+    ... this checks to see whether a user has provided a username in a form. In
+    this case, request.form.get isn't actually using the GET method, so the
+    terminology is somewhat confusing...but request.form.get is python
+    syntax, and GET is HTTP syntax, and they're not identical or anything like
+    that.
+
+    ... the IF NOT condition basically checks to see whether a username has
+    been given -- if not, then the apology is returned
+
+- You can also vary the behavior of a function depending on the type of HTTP
+    request received (GET vs. POST). For example, a GET request might show the
+    user a form, while a POST request might be expecting data from the form
+    that the user has filled out. The neat thing is that you can use one URL
+    to do 2 different things, depending on how the data comes to the program.
+    For example:
+
+        @app.route("/login", methods=['GET', 'POST'])
+        def login():
+            if request.method == "POST":
+                # do one thing
+            else:
+                # do a different thing
+
+    ... this particular example is almost like a DO/WHILE loop -- if the user
+    submits data (like through a form) then you would do one thing, but if not,
+    you could do another thing (like re-display the form for them to fill out)
+
+- Flask has a number of functions within its module that will be useful for
+    application development:
+
+        url_for()
+
+    ... this allows you to define a function and have a decorator associated
+    with it. It's useful if you have a URL that is 80 million characters long,
+    but you want to truncate it to something simple (like /login or /register),
+    and if you associated it with a decorator it will just plug it into the URL.
+    In other words, it's a way to short-hand long URL's.
+
+        redirect()
+
+    ... just redirects from one page to another
+
+        session()
+
+    ... useful for HTTP session data, used to track whether or not a user is
+    logged in, and constantly check to see if they're logged in, even if they're
+    going to different pages -- it's sort of like a global variable that can
+    be used across multiple pages
+
+        render_template()
+
+    ... used to create pages on a site that mix HTML and python together,
+    useful for pages with forms
+
+- More information on Flask and Jinja can be found here:
+
+    > http://flask.pocoo.org/docs/0.12/quickstart/
+    > http://jinja.pocoo.org/
+
+MVC
+------------------------------------------------------------------------
+- MVC is a programming paradigm that is very commonly-used for web design
+
+- It is used to abstract away certain details from the user that are not
+    necessary or are uninteresting for them to see, but that are essential for
+    yuor site to work properly
+
+- The primary motivation for this is data security
+
+- The basic components are:
+
+    > Model - this is where the important data for the site lives, and it may
+        be updated, referenced, or the like as part of the user experience
+
+    > View - these are the pages the user sees when they are interacting with
+        your site, usuall based on interaction with the model
+
+    > Controller - this is where the so-called business logic of your site
+        lives. Users may submit information to the controller, which will then
+        decide what to present to the user
+
+- The basic flow goes something like this:
+
+        user --> controller --> model --> view
+          ^                                |
+          |________________________________|
+
+- To change the permissions of a file to make it accessible (or not) to the
+    public, you need to befriend a command called "chmod". The syntax is:
+
+        chmod <permissions> <file(s)>
+
+- There are 2 different ways that permissions are applied using chmod. The
+    so-called octal numbers permissions scheme assigns permissions to three
+    categories of users simultaneously. For example:
+
+        chmod 711 file
+
+    ... would assign you the right to read, write, and execute the file, and
+    would allow others (specifically, your group and the world) to only
+    execute the file. The first number (7) is what you can do, the second (1)
+    is what your group can do, and the third (1) is what the world can do.
+    These octal numbers can be represented in a chart -- basically it's a number
+    scheme that goes from 0 - 7 with 3 possible binary permutations, ie. yes
+    or no, 1 or 0. So octal number 0 is 000, octal number 1 is 001, octal number
+    2 is 010, etc.
+
+- Besides the octal permissions scheme there is also the symbolic permissions
+    scheme. It can also assign permissions to three categories of users
+    simultaneously, but is typically best used to apply (or remove) a position
+    across the board. For example:
+
+        chmod a+x file
+
+    ... would add (or maintain) the right to execute the file to all three
+    categories -- 'a' for all categories, '+' for add (or maintain), and 'x'
+    for execute.
+
+- These are the symbolic permission characters for chmod:
+
+    > Reference
+        - a         all
+        - g         group
+        - o         others
+        - u         user
+
+    > Operation
+        - +         add perm
+        - -         remove perm
+        - =         exactly this perm
+
+    > Mode
+        - r         read access
+        - w         write access
+        - x         execute access
+
+- To check the permissions of a file, you can run:
+
+        $ ls -l
+
+    ... the stuff that appears on the left is usually the information about the
+    permission scheme. For example:
+
+        drwx-w---- 2 ubuntu ubuntu 4096 Oct 30 00:58 php/
+        drwx-w---- 3 ubuntu ubuntu 4096 Oct 30 00:55 php-webdev/
+        -rw------- 1 ubuntu ubuntu   28 Oct 30 01:01 test.php
+
+    ... so the first section is what you can do (rwx: read, write, execute),
+    the second section is what others can do (-w-: write), and the third is
+    what the world can do (---: nothing). The 'd' stands for directory, and
+    in the case of the third line, the dash in -rw just stands for "regular
+    files"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

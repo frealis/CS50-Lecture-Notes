@@ -1,0 +1,7 @@
+1. The crack.c code in pset2
+
+2. Review types of searches, especially binary searches
+
+3. Review sorting
+
+4. credit.py, vigenere.py, crack.py, more/similarities.py in pset6

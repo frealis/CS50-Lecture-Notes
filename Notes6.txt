@@ -1,0 +1,858 @@
+JAVASCRIPT
+---------------------------------------------------------------------------------
+- To start writing JavaScript, open up a file with the *.js file extension.
+
+- There is no need for code delimiters (like with PHP) -- the website will know
+    that the *.js file is JavaScript because it will be explicitly stated within
+    the <script> </script> HTML tags.
+
+- Unlike Python, which runs server-side, JavaScript applications run client-side
+    on your own machine.
+
+- When a client requests information from a webpage and Python sends some HTML and
+    CSS back, the interaction ends at that point -- you no longer have a way to
+    change or modify the information that has been sent. However, since JavaScript
+    is executed on the client's computer, this creates the possibility for some
+    interesting things after code has left your server.
+
+- Note: there's no equivalent of a main() function in Javascript
+
+- Note: Javascript has similar syntax with Java, but they don't have much in
+    common beyond that.
+
+FUNCTIONS in JAVASCRIPT
+---------------------------------------------------------------------------------
+- All functions are introduced with the function() keyword.
+
+- One notable thing about Javascript is that functions don't necessarily have to
+    have names -- these are known as anonymous functions, or "lambda" functions.
+    For example:
+
+        function foo(bar, baz)
+        {
+            ...
+        }
+
+    ... is a valid function, but so is this:
+
+        function(bar, baz)
+        {
+            ...
+        }
+
+    ... which has no name. Nameless functons tend to be bound to HTML elements
+
+- Functions (redux) -- this is an example of using the .map() method on an array
+    (the .map() method applies a functions to all elements of an array[]):
+
+        var nums = [1, 2, 3, 4, 5];
+
+        nums = nums.map(function(num) {
+            return num * 2;
+        });
+
+    ... starting from the inside and moving out, function(num) is an anonymous
+    function that takes an argument and calls it "num" and returns num * 2. The
+    .map() method takes this result and applies it to the first element in the
+    array called nums[]. The result is then stored in the array called nums[].
+
+VARIABLES in JAVASCRIPT
+---------------------------------------------------------------------------------
+- JavaScript variables are similar to Python variables. There is no data type
+    specifier. However, when you declare a variable in the same way as Python you
+    will create a global variable. In order to create a local variable, you have
+    to preface it with the -var- keyword. For example:
+
+        x = 10;         // this creates a global variable
+        var x = 10;     // this creates a local variable
+
+- You can also declare variables using the syntax "let":
+
+        let i = 0;
+
+LOOPS in JAVASCRIPT
+---------------------------------------------------------------------------------
+- DO/WHILE loop:
+
+        do
+        {
+            ...
+        }
+        while (true);
+
+-  WHILE loop:
+
+        while (true)
+        {
+            ...
+        }
+
+- FOR loop:
+
+        for (let i = 0; i < 50; i++)
+        {
+            ...
+        }
+
+    ... here's another that allows you to iterate over the values of an array:
+
+        for (let value of array)
+        {
+            ...
+        }
+
+CONDITIONAL STATEMENTS in JAVASCRIPT
+---------------------------------------------------------------------------------
+- IF/ELSE statment:
+
+        if (x < y)
+        {
+            ...
+        }
+        else if (x > y)
+        {
+            ...
+        }
+        else
+        {
+            ...
+        }
+
+ARRAYS in JAVASCRIPT
+---------------------------------------------------------------------------------
+- Arrays are a special case of an object (in fact, -everything- in JavaScript is a
+    special case of an object), and has numerous methods that can be applied to
+    them, for example:
+
+        > array.size()
+        > array.pop()
+        > array.push(x)
+        > array.shift()
+
+- There is also a method for arrays called map(), which can be used to apply a
+    function to all elements of an array (this is potentially a great opportunity
+    to use an anonymous function)
+
+- Declare an array -- in Javascript, arrays are dynamic and can grow/shrink:
+
+        var numbers = [4, 8, 15, 16, 23, 42];
+
+    ... another way using "let"
+
+        let numbers = [4, 8, 15, 16, 23, 42];
+
+- You can mix different data-types in arrays with Javascript. For example:
+
+        var mixed = {1, true, 3.33, "five"}
+
+OBJECTS/HASH TABLES in JAVASCRIPT
+---------------------------------------------------------------------------------
+- JavaScript has the ability to behave in a few different ways, but in particular
+    it can behave as an object-oriented programming language.
+
+- In C, structures contain a number of fields, or members, or properties.
+    Whatever you call them, they cannot ever stand on their own -- they are always
+    associated with the struct. For example:
+
+        struct car
+        {
+            int year;
+            char model[10];
+        }
+
+    ... this creates a struct of type "car"
+
+        struct car herbie;
+        herbie.year = 1963;
+        herbie.model = "Beetle";
+
+    ... this creates a struct of type "car" named "herbie" and assigns values to
+    the properties within "herbie".
+
+        struct car herbie;
+        year = 1963;
+        model = "Beetle";
+
+    ... however, this would be invalid C because the properties aren't explicitly
+    being associated with the struct car named "herbie".
+
+- Objects, meanwhile, have properties, but also "methods" (which are basically
+    functions) that are inherent to the object, and mean nothing outside of it.
+    Therefore "methods" (which are functions) are similar to C struct
+    fields/members/properties (which are values) in that they cannot stand alone,
+    although the way in that they are both created are entirely different.
+
+- One way to think about the difference between a function and an object is that
+    in C, a function might take a parameter or argument (named "argument") like
+    this:
+
+        function(argument);
+
+    ... whereas in JavaScript, which has object-oriented styling, places the
+    object at the core of everything, calls a method() (ie. function) that is
+    part of the object:
+
+        object.function();
+
+- The fields and methods() of an object are similar in spirit to the idea of a
+    dictionary -- in other words, an object is equivalent to a "dict" in Python
+    (and somewhat like a "struct" in C. String). It's basically a hash table:
+
+        var herbit = {year: 1963, model: "Beetle"};
+
+    ... you can also use the "let" syntax
+
+        let quote =
+        {
+            name: "Netflix, Inc.",
+            price: 199.3,
+            symbol: "NFLX"
+        };
+
+- Loops (redux) -- how do we iterate across all of the key-value pairs of an
+    object (or indeed, all of the elements of an array)? In Python you might
+    write something like this:
+
+        for key in list:
+            # in this example, "key" is used as a stand-in for list[i]
+
+    ... in JavaScript, you might write something like this to iterate over all
+    of the keys in an object:
+
+        for (var key in object)
+        {
+            // use object[key] here
+        }
+
+    ... there's a slight variation that uses "of" instead of "in" which allows
+    you to iterate over the values associated with a key, instead of iterating
+    over the keys themselves:
+
+        for (var key of object)
+        {
+            // use key in here
+        }
+
+- Here's another example:
+
+        var wkArray = ['Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat', 'Sun']
+
+    ... here we'll use "in" so that we can iterate over the keys in the array
+    called wkArray[], and console.log() will record the results (console.log() is
+    sort of the equivalent of printf() -- you can access it using developer
+    tools in most modern browsers):
+
+        for (var day in wkArray)
+        {
+            console.log(day);
+        }
+
+    ... since this array doesn't have any "keys" that are explicitly stated, it
+    will instead print out a list of indicies, ie. 0, 1, 2, 3, 4, 5, 6, which are
+    sort of like default "keys".
+
+- Printing and variable interpolation (insertion of something of a different
+    nature into something else, like inserting an "int" into a "string") --
+    you can concatenate by writing something like this:
+
+        console.log(wkArray[day] + ' is day number '
+                    + (day + 1) + ' of the week!';
+
+    ... however, the plus sign + is used here both to concatenate and to add
+    (day + 1) -- unfortunately, JavaScript will try to guess what to do but you
+    may get unexpected results, and actually in this case it will interpret
+    (day + 1) as a string. In order to ensure that (day + 1) is treated as an
+    integer, you have to add a bit of code:
+
+        console.log(wkArray[day] + ' is day number '
+                    + (parseInt(day) + 1) + ' of the week!');
+
+    ... so this is an example of why it's not always a great thing with higher
+    languages that you aren't required to specify a data-type when declaring
+    variables, as you have to do with C, because sometimes you have to later
+    come back and disambiguate the data-type of these variables -- especially
+    when a symbol like the plus sign + can have multiple uses.
+
+EVENTS in JAVASCRIPT
+---------------------------------------------------------------------------------
+- An "event" in HTML and JavaScript is a response to user interaction with the
+    web page (ex. a user clicks a button, a page has finished loading, a user has
+    hovered over a portion of the page, the user typed in an input field).
+
+- JavaScript has support for "event handlers", which are callback functions that
+    respond to HTML events (many HTML elments have support for events as an
+    attribute).
+
+- For example:
+
+        <html>
+            <head>
+                <title>Event Handlers</title>
+            </head>
+            <body>
+                <button onclick="">Button 1</button>
+                <button onclick="">Button 2</button>
+            </body>
+        </html>
+
+    ... in this example, onclick="" is the event handler -- whatever function you
+    put between the quotation marks "" will execute when the button is clicked.
+    We can write a generic event handler in JavaScript, creating an "event
+    object", that will tell us which of these two buttons was clicked:
+
+        <html>
+            <head>
+                <title>Event Handlers</title>
+            </head>
+            <body>
+                <button onclick="alertName(event)">Button 1</button>
+                <button onclick="alertName(event)">Button 2</button>
+            </body>
+        </html>
+
+    ... what this basically does is that whenever either button is clicked, the
+    alertName() function will be called and an "event" will be passed in. The
+    event is automatically generated by the page and basically contains all of the
+    information about what just happened. From that information, we can extract
+    more information. For example, here's what the alertName() function might
+    look like:
+
+        function alertName(event)
+        {
+            var trigger = event.srcElement;
+            alert('You clicked on ' + trigger.innerHTML);
+        }
+
+    ... so the alertName() function is accepting a parameter, which it names
+    "event". Next, the JavaScript local variable called "trigger" is established
+    which takes the value of the event's "source element", or scrElement, which
+    is the element on the HTML page that was initially interacted with in order
+    to trigger the event -- another way to put it is, "what element was passed
+    into this function?" In the above examples, it would identify which button
+    was pressed.
+
+    ... next, you can access the "trigger's" HTML (or source element) with
+    trigger.innerHTML -- the .innerHTML syntax shows what text is between the
+    <button> </button> tags, which in this case is either "Button 1" or "Button 2".
+
+MISC.
+---------------------------------------------------------------------------------
+- Note: JavaScript also has syntax for SWITCH and the ternary operator ? :
+
+- "Redux" is a predictable state container for JavaScript apps. It helps you
+    write applications that behave consistently, run in different environments
+    (client, server, and native) and are easy to test.
+
+JSON and CALLBACKS
+---------------------------------------------------------------------------------
+- Callbacks are an example of "asynchronous code". In C, if you wrote some code
+    and it came to a point in the code or a function that took awhile to run,
+    your code would just hang there and wait until it was finished before moving
+    on to the next step. We then started to see asynchronous code in Python while
+    using Flask, because Flask would continually run no matter what any other code
+    was doing. But with JavaScript, it really takes advantage of asynchronous
+    code with callbacks -- while one part of the code is taking awhile to
+    execute, other parts of the code can go ahead and run so that they are not
+    being held up
+
+- JSON -- "Javascript Object Notation":
+
+        {
+            "name": "Netflix, Inc."
+            "price": 199.3
+            "symbol": "NFLX"
+        }
+
+    ... another example:
+
+        <script>
+            function quote()
+            (
+                $.getJSON("/quote", {symbol: $("#symbol").val()}, function(data) {
+                    alert(data.price);
+                });
+            )
+        </script>
+
+    ... here, .getJSON() is a function/method that comes with jQuery and takes
+    at least two arguments -- a URL to get JSON from, in this case .getJSON gets
+    JSON data from /quote, and an anonymous function that takes input. When an
+    anonymous function takes arguments in this way, it's called a "callback".
+    The reason for callbacks is that sometimes the internet is slow and it takes
+    awhile for servers to respond to requests, so when data from the first
+    argument comes back, then whatever is in the second argument executes, or
+    "calls back". In other words, the first argument executes immediately, and
+    the second one executes as soon as it can.
+
+    ... the {symbol: $("#symbol").val()} portion is an object because it is
+    enclosed within curly braces {} -- symbol: is the key, $("#symbol").val() is
+    the value, similar to symbol: document.getElementById("symbol").value;
+
+- Note: symbol: document.getElementById("symbol").value and
+    "symbol": dobument.getElementById("symbol").value can be used when you're
+    providing the value as input -- however, if the value is being stored as
+    output then the double quotes "" are necessary. For whatever reason, JSON
+    writing JavaScript code with objects and keys and values, you don't need to
+    quote things
+
+- In a way, the entire JavaScript language is asynchronous -- it's constantly
+    waiting for someone to execute an event handler (ie. to click something), or
+    it can execute some function every x amount of seconds, or whatever else
+
+DOM - DOCUMENT OBJECT MODEL
+---------------------------------------------------------------------------------
+- DOM -- "Document Object Model", this is basically the "tree" structure that
+    represents a webpage
+
+- Objects contain two different things: properties (or data/values) and methods()
+    (which are functions that only apply to the object to which they are tied).
+
+- As we've seen, JavaScript objects are incredibly flexible, and can contain
+    various fields, even when those fields are other objects. Similarly, objects
+    inside of objects can contain more objects, and this can give rise to a sort
+    of nesting structure where objects are contained within objects. In a way, it
+    almost creates a sort of tree structure (like in C).
+
+- One very specific object in JavaScript is called the "document object. The
+    "document object" is one way of employing this paradigm, whereby that object
+    organizes the entire contents of a web page. Once you become familiar with
+    some of the properties and  methods() of the document object, you can change
+    them which allows you to manipulate the look and feel of your website. By
+    resetting these properties or calling certain methods(), the contents of our
+    web page can change without us needing to refresh the page.
+
+- By organizing an entire page into a JavaScript object, we can manipulate the
+    page's elements programmatically.
+
+- Note: in Chrome you can hit CTRL + SHIFT + J to open the JavaScript console
+
+    > console.dir(document) -- this arranges the console output into directories,
+    and takes "document", or the entire page, as an argument (?)
+
+- DOM (Document Object Model) Properties:
+
+        DOM Property    |                  Description
+    -----------------------------------------------------------------------------
+        innerHTML       |  - Holds the HTML inside of a set of HTML tags
+        nodeName        |  - The name of an HTML element of element's attribute
+        id              |  - The "id" attribute of an HTML element
+        parentNode      |  - A reference to the node one level up in the DOM
+        childNode       |  - An array of references to the nodes one level down
+                        |        in the DOM
+        attributes      |  - An array of attributes of an HTML element
+        style           |  - An object encapsulating the CSS/HTML styling of an
+                        |       element
+
+
+        DOM Methods             |               Description
+    -----------------------------------------------------------------------------
+    getElementById(id)          |   - Gets the element with a given ID below this
+                                |       point in the DOM
+    getElementsByTagName(tag)   |   - Gets all elements with the given tag below
+                                |       this point in the DOM
+    appendChild(node)           |   - Add the given node to the DOM below this
+                                |       point
+    removeChild(node)           |   - Remove the specified child node from the DOM
+
+
+- Javascript embedded in an HTML file might look something like this:
+
+        <html>
+            <head>
+                <script>
+
+                    alert("hello, world");
+
+                </script>
+                <title>Title</title>
+            </head>
+        ...
+
+    ... this would automatically display a pop-up message reading "hello, world"
+    everytime you visit the page. You could also do this:
+
+        <html>
+            <head>
+                <script>
+
+                    function greet()
+                    {
+                        alert("hello, world");
+                    }
+
+                </script>
+                <title>Title</title>
+            </head>
+            <body>
+                <form id="demo" onsubmit="greet(); return false;">
+                    <input id="name" placeholder="Name" type="text"/>
+                    <input type="submit"/>
+        ...
+
+    ... which would call the greet() function and show the same pop-up message,
+    but only after hiting the "Submit" button. The return false; statement
+    prevents the page from reloading itself after the user acknowledges the
+    message -- basically, after calling greet() the program is looking for
+    somewhere for the user's name to go, like a server, so return false; will
+    disable the built-in functionality of the browser to try to connect to a
+    server -- this allows you to use the function as a local application and not
+    really anything connected to a server (what???)
+
+- In HTML <input> fields, you can include autocomplete="off" to prevent them from
+    remembering previous entries:
+
+            <input autocomplete="off" .../>
+
+- You can also have a cursor automatically placed within an input field upon
+    loading a webpage, which gives focus to any forms that the user is supposed
+    to fill out, by using autofocus:
+
+            <input autofocus .../>
+
+    ... note that it doesn't require any arguments or anything like that
+
+- It's usually bad practice to mix code in with HTML -- you usually want to
+    separate back-end stuff and front-end stuff into separate files:
+
+        <html>
+            <head>
+                <title>Title</title>
+            </head>
+            <body>
+                <form id="demo">
+                    <input id="name" placeholder="Name" type="text"/>
+                    <input type="submit"/>
+                </form>
+                <script>
+
+                    document.getElementById("demo").onsubmit = ...
+                    alert(
+
+                </script>
+            </body>
+        </html>
+
+    ... "document" is a special global variable tha refers to the entire document,
+    or the webpage, "onsubmit" is an event-handler, "demo" refers to the form id
+    and is an arbitrary name (could be anything), and .getElementById is getting
+    an element, in this case <form>, with id = "demo"
+
+- The interesting thing about .getElementById is that you can grab something from
+    one of the nodes in the "tree" data structure that is defined by DOM -- the
+    document object model
+
+                            ,--> head --> title --> "hello, world"
+        document --> HTML -|
+                            '--> body --> "hello, world"
+
+    ... so you could get something from the body, the head, etc.
+
+- So as it turns out, there are different event-handlers that belong to forms.
+    Once a form has been "grabbed" by .getElementById, the event-handlers can be
+    used to call functions.
+
+- Another subtle thing to be aware of is that when a function is called by an
+    event-handler, you can omit the parentheses ():
+
+        <script>
+
+            function greet()
+            {
+                alert("hello, world");
+            }
+
+            document.getElementById("demo").onsubmit = greet;
+
+        </script>
+
+    ... the reason is that when you omit the parentheses () then the function is
+    not called right away -- since the greet() function is only supposed to be
+    called after the user clicks a button, you don't want it to execute
+    immediately. In way, omitting the parentheses () makes the function dormant.
+
+- You could also remove the function name "greet" and structure the code like
+    this:
+
+        <script>
+
+            document.getElementById("demo").onsubmit = function() {
+                alert("hello, world");
+            };
+
+        </script>
+
+    ... in this case you might expect function() to execute immediately, but it
+    doesn't because it's immediately followed by curly braces {} -- this is just
+    some weird JavaScript thing. So to recap, if a function is written like this:
+
+        function()
+
+    ... then it will execute as soon as it is read, but if the function is
+    written like this:
+
+        function () {...}
+
+    ... then it won't
+
+- Here's an example of passing some variables into an HTML document using
+    JavaScript:
+
+        ...
+        <form id="demo">
+            <input id="name" placeholder="Name" type="text"/>
+            <input type="submit"/>
+        </form>
+        <script>
+
+            document.getElementById("demo").onsubmit = function() {
+                let name = document.getElementById("name").value;
+                alert("hello, " + name);
+            };
+
+        </script>
+        ...
+
+    ... so this will get an element with id = "name", in this case the element
+    comes from <input>, and the .value attribute will literally get the "value"
+    that came from input and is stored in "name"
+
+- JavaScript utilizes the back-tick character, `. It's basically the other option
+    on the tilde ~ key. You can use it in order to declare variables within a
+    string, known as a "template literal", like this:
+
+        <script>
+
+            document.getElementById("demo").onsubmit = function() {
+                let name = document.getElementById("name").value;
+                alert(`hello, ${name}`);
+            };
+
+        </script>
+
+- You can also break it up a little, and do other stuff:
+
+        <script>
+
+            let form = document.getElementById("demo");
+            form.onsubmit = function() {
+
+                if (form.email.value == "")
+                {
+                    alert("missing email");
+                    return false;
+                }
+                else if (form.password.value == "")
+                {
+                    alert("missing password")
+                    return false;
+                }
+                else if (form.password.value != form.confirmation.value)
+                {
+                    alert("passwords don't match");
+                    return false;
+                }
+                else if (!form.agreement.checked)
+                {
+                    alert("checkbox unchecked");
+                    return false;
+                }
+
+                return true;
+
+            };
+
+        </script>
+
+    ... what this does is make sure that an email field in a form (not shown) is
+    not empty -- if it is, then the function will return false; which prevents
+    them from submitting the form (stop the form, let the user try again)
+
+    ... it continues with password, password confirmation, and a check box -- that
+    "!" syntax is a boolean check
+
+    ... this whole block of code can be cut out of the *.html file and referenced
+    with something like this:
+
+        <html>
+            <head>
+                <script src="form1.js"></script>
+                <title>form1</title>
+            </head>
+            ...
+
+    ... so the code can go into an external file called "form1.js". Note: you
+    have to write the script tag as-is, you can't do something like
+    <script src="file_name.js"/> unfortunately
+
+JQUERY
+---------------------------------------------------------------------------------
+- Because DOM manipulation is so common with JavaScript, and because the
+    JavaScript to do so can get quite lengthy, people wanted alternatives.
+
+- jQuery is a popular open-source library, released in 2006, that is designed to
+    simplify client-side scripting (such as DOM manipulations). For example:
+
+        document.getElementById('colorDiv').style.backgroundColor = 'green'
+
+    ... what this does is, starting at the top of the document object, look through
+    the entire page for an element in the page whose "id" is "colorDiv" and
+    changing that element's background color to green. An equivalent line of
+    code in jQuery would look like this:
+
+        $('#colorDiv').css('background-color', 'green');
+
+    ... where the dollar sign $ is short-hand for jQuery, the pound sign # is
+    short-hand for .getElementById(), and the rest is just jQuery-specific
+    syntax when styling with CSS.
+
+- jQuery is (or was) a widely-used JavaScript library. In order to use it, you
+    can reference the source with something like this:
+
+        <html>
+            <head>
+                <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+                <script>
+
+                    $(document).ready(function() {
+
+                        $("#registration").submit(function() {
+
+                            if (!$("#registration input[name=email]").val())
+                    ...
+
+    ... so the "$" here isn't the same as the one used with the back-ticks to
+    insert a variable into a string. In this case, it is an alias for jQuery,
+    which is a command that you need to use stuff from the jQuery library, but it
+    was shortened to "$" so that you wouldn't have to type out jQuery each time.
+    Anyways, whatever is within parentheses after "$" is "wrapped" in jQuery --
+    it has access to the jQuery library (in this case it is document, so, the
+    entire webpage has access) and has even more functionality than before
+
+    ... one of the functions provided by jQuery is .ready() -- in this case, it
+    takes function() as an argument, and what it does is make it so that
+    function() is called when the document is "ready" (or loaded)
+
+    ... the "#" in #registration means "grab the DOM node whose unique id is
+    registration" -- similar to .getElementById(). The "#" notation is somewhat
+    similar in spirit to CSS selectors
+
+    ... the .submit() syntax in jQuery is basically the same as .onsubmit()
+
+    ... if you don't want to give unique id's to your form fields, that's ok,
+    because you can use CSS-like selectors -- in
+    "#registration input[name=email]", #registration is used to "grab" anything
+    named "registration", input is the child/descendent of element type <input>,
+    and then only grab the val(), or value of that <input> if it's name is
+    "email"
+
+- Also weirdly, "$" and some other characters are legitimate characters to use in
+    variable names -- this isn't true in C or Python
+
+NAVIGATOR
+---------------------------------------------------------------------------------
+- There is a global variable that comes with browsers these days called
+    "navigator". It's a special global variable that has geographic-related
+    functionality built into it. One of the features is geolocation:
+
+        <script>
+
+            navigator.geolocation.getCurrentPosition(function(position) {
+                document.write(position.coords.latitude + ', ' + position.coords.longitude);
+            });
+
+        </script>
+
+    ... so navigator is a global variable/object and geolocation is one of the
+    built-in functionalities or features of navigator. One of geolocation's
+    functions/methods is .getCurrentPosition() which literally gets latitude
+    and longitude coordinates to figure out where in the world the browser is
+    located. The anonymous function takes "position" as an argument, and per the
+    documentation it is a special object containing coordinates. Once called, the
+    next line of code executes -- document.write will write coordinates to the
+    webpage
+
+    ... since getting coordinates via GPS can take awhile, using asynchronous
+    coding with navigator is beneficial
+
+AJAX (formerly "Asynchronous JavaScript and XML")
+---------------------------------------------------------------------------------
+- AJAX allows us to dynamically update a webpage...even more dynamically. It used
+    to be an acronym for "Asynchronous JavaScript and XML" but that's sort of a
+    "backronym" -- it's not really associated with XML anymore, usually JSON is
+    used instead.
+
+- Up until now, our interaction with JavaScript has been mostly limited to: push
+    a button, something happens
+
+- We still don't have to entirely reload our page, but there is still some degree
+    of user interaction
+
+- Ajax allows us to refresh portions of a page, instead of the whole thing. In
+    this part of the course we'll just be making a server request when a user
+    hits a button, although Ajax is capable of doing all sorts of other things.
+
+- In order to asynchronously update our page we have to make usre of a special
+    JavaScript object called an XMLHttpRequest. In order to create it, all you
+    have to do is write something like this:
+
+        var xhttp = new XMLHttpRequest();
+
+    ... this creates an XMLHttpRequest object named "xhttp".
+
+- After obtaining your new object (XMLHttpRequest) you need to define its
+    onreadystatechange behavior -- this is a function (typically an anonymous
+    function) that will be called when the asynchronous HTTP request has
+    completed, and thus typically defines what is expected to change on your site.
+
+- XMLHttpRequests have two additional properties that are used to detect when the
+    page finishes loading:
+
+        > The "readyState" property will change from 0 (request not yet
+            initialized) to 1, 2, 3, and finally 4 (request finished, response
+            ready).
+        > The status property will (hopefully) be 200 (OK).
+
+- Next, make your asynchronous request using the open() method to define the
+    request and the send() method to actually send it. Note: there is a slightly
+    different way to do this syntactically with jQuery.
+
+- Here is a JavaScript function using Ajax that is basically preparing, opening,
+    and sending an Ajax request:
+
+        function ajax_request(argument)
+        {
+            var aj = new XMLHttpRequest();
+            aj.onreadystatechange = function() {
+                if (aj.readyState == 4 && aj.status == 200)
+                    // do something on the page
+            };
+
+            aj.open("GET", /* url */, true);
+            aj.send();
+        }
+
+    ... so the first thing that happens is that you create the new XMLHttpRequest
+    and assign it to "aj". Next, create an anonymous function that executes on
+    the ready state change (onreadystatechange) -- but this only happens when the
+    ready state is 4 and the HTTP status is 200. Once this has happened, we're
+    going to open our Ajax/XML request by basically creating a GET request of a
+    particular URL (don't worry about what 'true' means for now) and then finally
+    send the request.
+
+- More commonly, you'll see Ajax requests written using jQuery instead of "raw"
+    JavaScript. To learn more, visit http://api.jquery.com/jquery.ajax/
+
+- So these Ajax GET requests can be sent to any servers, not just your local
+    server -- they can be sent to Google, Yahoo Finance, etc.
+
+
+
+
+
+
+
+
+
+
+
+

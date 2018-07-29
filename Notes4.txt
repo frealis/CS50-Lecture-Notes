@@ -1,0 +1,1182 @@
+-   pset6   ---------------------------------------------------------
+
+PYTHON
+---------------------------------------------------------------------
+- So far in the course, we have been focused on C, which is called
+    "procedural" or "imperative" programming
+
+- The basic print function in python would like look this:
+
+        def main():
+            print("hello, world")
+
+        if __name__ == "__main__":
+            main()
+
+    ... as opposed to C, which looks like this:
+
+        #include <stdio.h>
+
+        int main(void)
+        {
+            printf("hello, world\n");
+        }
+
+    ... in the above example, def main(): defines the main function,
+    if __name__ == "__main__": main() is some weird convention that must
+    be declared if def main() is declared, but otherwise the main
+    differences include ending a function with a colon instead of a semi-
+    colon, omitting curly braces and using indentation to indicate the
+    elements that belong to a function (in this case, indenting print())
+
+- Python still has data types, but they're not explicitly defined --
+    namely, the main() function doesn't have an explicit data type, unlike
+    in C where main() has data type int
+
+- The statement:
+
+        if __name__ == "__main__":
+            main()
+
+    ... is a weird incantation that just ensures that the default
+    function that will be called is actually called main()
+
+- A WHILE loop in python would look like this:
+
+        while True:
+            print("hello, world")
+
+    ... one of the conventions in python when using boolean values, aka
+    true or false, is to capitalize them, ie. True, False
+
+    ... another convention is that if you do not logically need to use
+    parenthesis to enforce order of operations, like in a math equation,
+    then you don't have to use them
+
+    ... also, while True: is the easiest way to get a loop going in
+    python -- it's infinite, which is not good, but you can break out
+    of it as in the example below.
+
+- A DO/WHILE loop does not exist in python, but you can mimic it using
+    something like this:
+
+        from cs50 import get_int
+        i = get_positive_int("Enter a positive integer: ")
+        print(i)
+
+        def get_positive_int(prompt):
+            while True:
+                n = get_int(prompt)
+                if n > 0:
+                    break
+
+    ... in this case, you could actually run a program using this
+    function without a return value and it would still run -- however,
+    if you entered a positive integer the result would be "None", which
+    is like python's version of NULL. The python interpreter (named
+    "python") isn't as disciminate as clang is in C -- it will let the
+    program run even if some practical elements of the program are
+    missing
+
+        from cs50 import get_int
+        i = get_positive_int("Enter a positive integer: ")
+        print(i)
+
+        def get_positive_int(prompt):
+            while True:
+                n = get_int(prompt)
+                if n > 0:
+                    break
+        return n
+
+    ... just adding the line "return n" is all you need to return a
+    value.
+
+    ... So the sequence looks something like:
+
+        1. "Enter a positive integer: " string is displayed
+        2. get_positive_int() is called
+        3. A potentially infinite while True: loop begins
+        4. get_int() from the cs50 library is called
+        5. The user enters an integer/number/anything
+        6. That integer/number/anything is stored in 'n'
+        7. If n > 0 then the while True: loop will break and return the
+            value of 'n' to get_positive_int(), and subsequently store
+            that value in 'i', and then print(i) happens
+        8. If n < 0, the loop repeats
+
+    ... this also illustrates that the issue of variable scope in C is
+    not as problematic in python -- though the variable "n" is declared
+    within the WHILE loop, it can be used outside of that scope at the
+    end of the function with the line "return n" -- in C, placing the
+    return command outside of the WHILE loop would generate an error
+    because of variable scope
+
+- A FOR loop in python would look like this:
+
+        for i in range(50):
+            print("hello, world")
+
+    ... in this case, range() is a "class" that will spit out 50 values,
+    which are 0-indexed so 0 through 49 -- so in C you might have a for
+    loop that creates an array with 50 values, but range() has the option
+    to go up to 50 but maybe not necessarily so -- it sort of dynamically
+    allocates space for an array as it counts
+
+    ... another interesting thing about range() is that it will hand out
+    values 1 at a time -- it doesn't automatically complete 50 loops of
+    printing out "hello world", but it will keep doing so unless you can
+    think of some condition to put in there to stop it. Therefore, it
+    may perform this loop 50 times, 1 time, or any number of times in
+    between
+
+    ... also, "i" is a variable but the data type is not mentioned -- it
+    is implied
+
+- An IF/ELSE condition in python would look like this:
+
+        if x < y:
+            print("x is less than y")
+        elif x > y:
+            print("x is greater than y")
+        else:
+            print("x is equal to y")
+
+    ... one of the main differences here is that ELSE IF is replaced by
+    ELIF -- sounds like "elf" I guess, weird
+
+- So in C, the basic path that source code takes to machine code looks
+    like this:
+
+        source code -> compiler -> machine code
+
+- In python, the path looks like this:
+
+        source code -> interpreter
+
+    ... and the command line to run a python program looks like this:
+
+        python name.py
+
+    ... where "name.py" is the name of the program, and "python" is
+    the name of the interpreter that runs to program -- which is slightly
+    confusing since the name of both the language and the interpreter
+    is "python"
+
+    ... The "python" command that you can use in the command line comes
+    installed on most computers, it's basically the name of the
+    interpreter
+
+- However, technically "under the hood" there is some other stuff going
+    on:
+
+        source code -> compiler -> byte code -> interpreter
+
+    ... so "machine code" is replaced with "byte code", and there's
+    even something called a "python virtual machine", but all of this is
+    abstracted away
+
+- Unlike in C, in python you don't have to explicitly declare variable
+    data types -- they are just sort of "taken on" when you start
+    assigning values to them. Additionally, in python there is actually
+    a "string" data type referred to as "str".
+
+- Python has different methods for getting input from users compared to
+    C, but the cs50 library has abstracted away some of those methods
+    for the meantime -- however, later they're going to take away the
+    "training wheels".
+
+- In python, as opposed to a statically declared array you have "lists"
+    which are basically arrays that can grow or shrink to fit the data
+    that is assigned to it -- unlike in C where you had to use malloc()
+    or realloc() or other methods to modify the storage capacity of an
+    array. In order to declare a list, all you have to do is something
+    like the following:
+
+        list_name = []
+
+    ... you can also pre-populate a list with values:
+
+        list_name = [1, 2, 3, 4]
+
+- Another useful python structure is a "set" where you can put a bunch
+    of data into a sort of "structure", but you want to make sure that
+    each value is unique -- there are no duplicates
+
+- A "tuple" is another sort of structure that combines multiple
+    different things without requiring a full-fledged data structure --
+    for example, you might have a "tuple" that is simply (x, y). It's not
+    really comparable to anything in C. In other words, tuples are ordered,
+    immutable sets of data; they are great for associating collections of data,
+    sort of like a struct in C, but those values are unlikely to change.
+
+- Here is a list[] of four tuples:
+
+        presidents = [
+            ("George Washington", 1789),
+            ("John Adams", 1797),
+            ("Thomas Jefferson", 1801),
+            ("James Madison", 1809)
+        ]
+
+- It is possible to iterate over a list of tuples. For example:
+
+        for prez, year in presidents:
+            print("In {1}, {0} took office".format(prez, year))
+
+    ... as an aside, this example shows that the print function used in
+    conjunction with the .format() method in python can have the text formatted
+    in whatever order you want -- in this case, 'prez' is argument 0, and 'year'
+    is argument 1, but you could easily switch them. In fact, python will take
+    in the arguments in .format() from left to right, and plug them into {} in
+    the same order by default:
+
+        for prez, year in presidents:
+            print("In {}, {} took office".format(year, prez))
+
+    ... this would give the same result as above
+
+- Another thing about python is that single quotes and double quotes
+    are equivalent
+
+- Single line comments are prefixed with #
+
+- Doc-strings, or document string comments are surrounded by three sets
+    of 2x quotes:
+
+        def square(n):
+            """Return square of n"""
+            return n**2
+
+    ... the nice thing about doc-string comments is that other programs
+    can read these comments and generate documentation for you
+
+    ... another thing to note is that in C, the convention is usually
+    to place the comment above, or outside of the function, but in
+    python in order to use these doc-strings the convention is to place
+    the comment inside of the function on the first line
+
+PRINT in PYTHON
+---------------------------------------------------------------------
+- So the default syntax for printing a static message to the screen would
+    look something like this:
+
+        print("hello, world")
+
+    ... to print a single variable, you could do this:
+
+        print(s)
+
+    ... however, to print something static like "hello, {s}" which is
+    some static text along with a variable, you have to use the
+    "formatted" property of print, which is explained next.
+
+- So let's say you  wanted to print something from user input (this
+    example uses a cs50 function which is discussed further in the next
+    section), it may look something like this:
+
+        from cs50 import get_string
+
+        s = get_string("name: ")
+        print(f"hello, {s}")
+
+    ... so this is similar to printf() in C, except that the "f" goes
+    inside of the parentheses.
+
+    ... the inner "f" stands for "formatted" which allows you to print
+    explicit strings (non-variables) and variables together.
+
+- Another way to accomplish the same thing is to write something like
+    this:
+
+        from cs50 import get_string
+
+        s = get_string("Enter name: ")
+        print("hello, {}".format(s))
+
+    ... "hello, {}" is a string, or str, and in python they are
+    considered to be first-class objects. This means they can have
+    functionality
+
+    ... .format(s) is a function of strings, or str's (there are also
+    other functions mentioned in documentation that are inside of the
+    string object.) Anyways, .format() takes an argument and plugs it
+    into the string to its left, in this case, "hello, {}"
+
+    ... and another thing, when a function is inside of an object (ie.
+    .format()) it is referred to as a "method" -- but functions and
+    methods are basically the same thing
+
+- As an aside, a string in python is a first-class object in python,
+    which means that it's not just a string of characters, it has
+    built-in functionality or features. In the same way that a struct in
+    C could have multiple things inside of it, a string in python also
+    has multiple things inside of it -- not just a sequence of
+    characters, but functions. So yeah, you can access those functions
+    with the same dot operator as in C, ie. .format()
+
+- Another thing that print() does in python is automatically add a
+    newline character to the end of a string, ie. "\n". You can get
+    around this by using something like this Mario example:
+
+        for i in range(4):
+            print("?", end="")
+        print()
+
+    ... in this case, print is taking 2 arguments, the first of which is
+    the string "?", and the second is end="" which is a type of "named
+    parameter" -- this is special functionality that python supports, as
+    opposed to C where arguments that get passed don't initially have
+    names, they have to be passed in a certain order. In Python, the
+    order that arguments/parameters are passed into a function doesn't
+    matter, since the parameters are named -- however, the range()
+    method in a FOR loop can take up to 3 parameters:
+
+        range(starting number, ending number, increment)
+
+    ... and in this case it does matter which order the parameters are
+    passed (NEEDS CLARIFICATION)
+
+    ... so what's happening is that there is a FOR loop and you want to
+    print four "?" marks side-by-side. In this case, end="" is over-
+    riding print's default functionality which is to automatically add
+    a newline, or "\n", at the end of the the string. In this case, it
+    is replacing it with nothing. This happens 4 times. Afterwards,
+    print() prints "\n", or a newline.
+
+    ... this kind of illustrates an issue with higher-level programming;
+    so now we don't have to type "\n" all of the time because it is
+    automatically added for us, but in order to turn it off we can use
+    the named parameter "end" as an argument in print()
+
+    ... so it looks like print() can take parameters just as with C, but
+    also it has this whole other category of parameters called "named
+    parameters"
+
+    ... in C, any parameters that you pass to a function are defined
+    ultimately by way of their order, because even if a function takes
+    arguments that are defined by arbitrary names like 'x', 'y', 'a',
+    'b', or whatever, those names are localized -- the names don't mean
+    anything to main int(void), or whatever other function called them.
+
+    ... int main(void) or whatever is just looking for a return value,
+    if any.
+
+    ... The function that receives these arguments is really only
+    concerned with the order in which the arguments are received, not
+    their names.
+
+    ... Python is more flexible in that if a function receives multiple
+    arguments that all have names, ie. x, y, a, or b, then you can
+    mention these names explicitly -- the order doesn't matter
+
+
+IMPORTING LIBRARIES in PYTHON
+---------------------------------------------------------------------
+- In C, in order to import a library you'd type something like:
+
+        #include <stdio.h>
+        #include "whatever.h"
+
+- In python, there are multiple ways to include libraries, and it's
+    important to include them correctly. To include a single function
+    from a library you might use syntax like this:
+
+        from cs50 import get_string
+
+    ... this includes the get_string() function from the cs50 library
+
+        from cs50 import *
+
+    ... this includes EVERYTHING from the cs50 library, including
+    variables. Python doesn't have the same notion as "variable scope"
+    as C, so if for instance the cs50 library had variables named "x"
+    or "y", and you were to use the same variable names in your program
+    after calling the cs50 library, then all sorts of craziness would
+    happen because there isn't the same notion of variable scope --
+    whatever value of "x" has in the cs50 library may be transmitted
+    into your program.
+
+        import cs50
+
+    ... this includes the entire cs50 library without the problem with
+    variable scope mentioned above, however you have to prefix each
+    function from the cs50 library in your code with cs50.* so for
+    example, to use get_string from the cs50 library in this case, you'd
+    have to type something like this:
+
+        cs50.get_string(whatever)
+
+MAIN() in PYTHON
+---------------------------------------------------------------------
+- One of the main differences between C and python, is that in C:
+
+        int main(void)
+
+    ... will get called automatically once you run the function. However,
+    in python you need to explicity state that main() is the default, or
+    first function that will get called once the program is executed. In
+    C, humans decided years ago that main() will the first function that
+    is called
+
+    ... To be more specific, in python you don't even need to name the
+    default function main() -- you can name it whatever you want,
+    whereas in C it has to explicitly be int main(void) or something
+    similar, because that's what some people decided to do years ago.
+    However, python can have whatever name for the default function.
+
+- In order to make main() the default function, or first function, to be
+    called when running the program, you have to explicitly express that
+    using something like this:
+
+        if __name__ == "__main__":
+            main()
+
+    ... which is weird, but that's what it is. There is a special global
+    variable called __name__, and if that default variable happens to be
+    __main__ then the default, or first function to execute, will be
+    whatever comes next -- in this case, main()
+
+- Additionally:
+
+        def main():
+
+        ...
+
+        if __name__ == "__main__":
+            main()
+
+    ... isn't even necessary in python -- if you just have a few lines
+    of code and only 1 function, python assumes that everything is part
+    of the "main()", or a default type of function (again, you can name
+    the "main()" function whatever you want). So if your code is pretty
+    simple and doesn't require multiple functions, you can omit the
+    above lines of code -- however, there is an example where if your
+    program only has one additional function, then you can still omit
+    these lines of code -- I'm not too sure about this yet
+
+- In C, if a function or variable is defined in lines of code below the
+    main function, ie. int main(void), then there has to exist a proto-
+    type function or variable placed above main() in order for C to
+    recognize the function or variable because C reads from top to
+    bottom. In python, prototype functions aren't necessary -- you can
+    define a function or variable wherever you want, on whatever line
+
+OPERATORS in PYTHON
+---------------------------------------------------------------------
+- One of the main differences is the division operator -- in C, when you
+    divide one number by another, it will divide the numbers but floor
+    the remainder, or drop them off. You can find those numbers using
+    the modulus operator, but basically, that's what C does. It truncates
+    the result to the nearest integer, rounding down, and discards the
+    remainder. Another term for this is "floor division".
+
+- Python does not do this fortunately, it actually will calculate the
+    result of division in terms of a float or something similar. However,
+    if you still want floor division in python, you can use the operator
+    // -- basically two division symbols, which is the comment tag in C,
+    but in python it'll do some floor division
+
+- The square operator is **
+
+- The add/append operator is += -- this can either add two numbers
+    together, or append a character to the end of a string
+
+DATA TYPES in PYTHON
+---------------------------------------------------------------------
+- Number data types tend to have higher numbers of bits/bytes assigned
+    to them compared to C. Specifically for integers, C uses 32 bits,
+    or 4 bytes (usually), to represent integers, which can go as high as
+    a few billion, however python integers are 64 bits
+
+COMMAND LINE in PYTHON
+---------------------------------------------------------------------
+- In C, in order to take command-line arguments from a user, you'd write
+    something like this:
+
+        int main(int argc, char *argv[])
+
+- In python, in order to command-line arguments from a user, you'd write
+    something like this:
+
+        import sys
+
+        if len(sys.argv) == 2:
+            print(f"hello, {sys.argv[1]}")
+
+    ... as it turns out, the feature command-line arguments are provided
+    by a "package" or a "library" that you can get using the line
+    "import sys". Within the "sys" package is an array, or "list", named
+    argv, similar in spirit to the same syntax used in C
+
+    ... to check to make sure that the user only entered two command
+    line arguments, you can use if len(sys.argv) == 2: which checks to
+    make sure that the length of argv, which is an array or "list" that
+    is located in the "sys" library, is == 2, though it would appear as
+    though there are 3 command line arguments. For example:
+
+        $ python name.py Stelios
+
+    ... in this command line, it would appear as though there are 3
+    arguments -- python, name.py, and Stelios. However, the first term
+    "python" is the interpreter, and is sort of equivalent to ./ in C,
+    so I guess you can ignore it (for example, the command line to do
+    something similar in C would look like this: ./name.c Stelios).
+
+    ... anyways, by using the if() and len() functions you can create a
+    condition that executes when there are 2 command-line arguments, in
+    this particular case. These arguments apparently get passed to the
+    argv function within the sys library (hence sys.argv), and then
+    the print() function will print "hello, {sys.argv[1]}, or in
+    other words, "hello, {second argument}"
+
+    ... the second argument is the result of looking into the system
+    package, aka "sys", which has the variable "argv" for argument
+    vector, which is itself an "array" or "list" and gives the result of
+    indexing into element 1
+
+LISTS in PYTHON
+---------------------------------------------------------------------
+- So in python, there are "lists" instead of "arrays". To declare a list, all
+    you have to do is use something like this:
+
+        x = []
+
+    ... this creates an empty list named 'x'. You don't have to worry about
+    memory management or anything -- the list will grow and shrink depending on
+    what you put in it.
+
+- You can also declare a list which looks like a function:
+
+        x = list_function()
+
+    ... here, list_numbers() is created and it returns nothing to 'x' --
+    basically this also creates an empty list. However, similarly to C, you can
+    pre-populate a list with hard-coded values:
+
+        x = [1, 2, 3]
+
+- Another thing is that python includes something called "list comprehension"
+    -- an example looks something like this:
+
+        numbers = [x for x in range(50)]
+
+    ... so what this is doing is using a FOR loop to generate a list[] of
+    numbers, all in one line, which is nice.
+
+    ... Alternatively, you could use the .append() method which will add values
+    to the list, for example:
+
+        numbers = []
+        for x in range(50)
+            numbers.append(x)
+
+    ... or you could use the .insert() method which will add values to the list
+    at a specific location -- the first argument is the location, the second
+    argument is the value. For example, this will insert the value '5' into
+    location '4':
+
+        numbers = [1, 2, 3, 4]
+        numbers.insert(4, 5)
+
+    ... and there's even another way, you can use the len(): function to get
+    the length of the array, which is '4', and insert the value of '5' into
+    that location by "splicing" two lists together:
+
+        numbers = [1, 2, 3, 4]
+        numbers[len(numbers):] = [5]
+
+    ... this allows the possibility to attach one entire list to another list,
+    instead of just one element
+
+- The nice thing about lists in python, as opposed to arrays in C, is that if
+    you want to know the length of a list you can simply use:
+
+        len(name_of_list)
+
+    ... so you don't have to necessarily remember the length of an
+    "array" aka "list", you don't have to reallocate memory, etc., you
+    can just ask it.
+
+    ... len() can be used on both strings and lists
+
+- Back in the day using C, if you wanted to print out all of the contents
+    of an array you could use something like this:
+
+        #include <cs50.h>
+        #inlcude <stdio.h>
+
+        int main(int argc, string argv[])
+        {
+            for (int i = 0; i < argc; i++)
+            {
+                printf("%s\n", argv[i]);
+            }
+        }
+
+    ... which would iterate over each i'th element of argv[i] until it
+    hit the limit of argc, printing out each element in that vector
+
+- To print out all of the contents of an array/list in python, you could
+    use something like this:
+
+        import sys
+
+        for s in sys.argv:
+            print(s)
+
+    ... so "import sys" would import the system library which allows the
+    user to enter command-line inputs, 's' is an arbitrary variable name,
+    the FOR function implies that it will search every element of
+    the array/list sys.argv, and print(s) will print each element, which
+    has arbitrarily been given the name 's'. You could change 's' to 'x',
+    or whatever you want. But this example sort of illustrates some of the
+    assumptions that python makes.
+
+- If you want to print every character, you can take this one step
+    further. So back in the day with C, if you wanted to print out every
+    command-line argument, whether it's 1 or 2 or 5, or whatever, you
+    might write something like this:
+
+        #include <cs50.h>
+        #include <stdio.h>
+        #include <string.h>
+
+        int main(int argc, string argv[])
+        {
+            for (int i = 0; i < argc; i++)
+            {
+                for (int j = 0, n = strlen(argv[i]); j < n; j++)
+                {
+                    printf("%c\n", argv[i][j]);
+                }
+                printf("\n");
+            }
+        }
+
+    ... this is basically just a couple of nested loops, wherein the
+    outer loop iterates over the number of arguments (ie. argc) and the
+    inner loop iterates over the number of characters
+    (ie. strlen(argv[i]) of each string
+
+- You can accomplish the same thing in python doing something like this:
+
+        import sys
+
+        for s in sys.argv:
+            for c in s:
+                print(c)
+
+    ... so this accomplishes the same thing using two FOR loops, but it's
+    a lot more succinct -- again, it assigns the name 's' to every
+    element in the sys.argv "list", and assigns the name 'c' to each
+    character within anything named 's' -- in this case, the strings
+    or elements contained in sys.argv
+
+LOOPS in PYTHON
+---------------------------------------------------------------------
+- Whereas with C there were 3 kinds of loops -- WHILE, DO/WHILE, FOR --
+    in python there are only 2 -- WHILE, FOR
+
+- A WHILE loop in python might look like this:
+
+        x = 0
+        while x < 100:
+            print(x)
+            x += 1
+
+    ... this would set x = 0, and starting from 0 it would increment by
+    1 and print each value from 0 - 99 (note: you can't use ++ to
+    increment by 1 in python, as you are able to do with C).
+
+- A FOR loop might use this syntax:
+
+        for x in range(100):
+            print(x)
+
+    ... the FOR loop syntax in python assumes that you are starting at
+    0 and incrementing by 1 until you reach range(). However, you can
+    add arguments to the range() method to change the count's starting
+    point, and also to change the amount by which 'x' will increment.
+    For example:
+
+        for x in range(6, 100, 2):
+            print(x)
+
+    ... would start at 6 and increment by 2 until it reached 98.
+
+MISC
+---------------------------------------------------------------------
+*** THIS SECTION NEEDS WORK ***
+
+- There is technically no such thing as a "char" in python, or an
+    individual character. In python, an individual character would be a
+    string of length == 1 (this is why single quotes, ie. 'x', no longer
+    have any special meaning over double quotes, ie. "x")
+
+- As it turns out, 'c' is just a 1-character string, and strings are one
+    of many "classes" of "objects" in python -- a "class" is a fancy
+    name for "struct"
+
+- An example of an "object" in python, which are divided into "classes"
+    and basically resemble a "struct" in C, would be "string".
+
+- Ok so the heirarchy w/ a few examples looks something like this:
+
+        Objects
+
+            |
+            V
+
+        Classes / Data Types
+            - strings
+            - lists
+
+            |
+            V
+
+        Methods / Functions
+            - isupper (strings)
+            - append (lists)
+
+- Note: lists use [], tuples use (), and dictionaries use {}
+
+STRUCTS (or something similar) in PYTHON
+---------------------------------------------------------------------
+
+- This example shows how you can create two lists that store data about
+    individual students, but there is no real way to map information
+    from one list to the other -- coincidentally, students[0] and
+    dorm[0] would be tied together as if in like a sort of "social
+    contract", and student[1] and dorm[1] would probably be related,
+    but there is nothing in the code that strictly forces that. The
+    example is here:
+
+        from cs50 import get_string
+
+        students = []
+        dorms = []
+
+        for i in range(3):
+            name = get_string("Name: ")
+            dorm = get_string("Dorm: ")
+            students.append(name)
+            dorms.append(dorm)
+
+    ... so again, nothing really ties or maps the elements in students[]
+    to dorms[]
+
+- Conventionally, structs, or "classes" in python start with a capital
+    letter, ie. Students
+
+- In order to create a class, you would create a new file with the same
+    extension as a normal python file (as opposed to C, where the
+    struct's would usually be defined in a *.h file but the source code
+    is stored in a *.c file). For example, student.py, which defines
+    the Student class, might look something like this:
+
+        class Student:
+            def __init__(self, name, dorm):
+            self.name = name
+            self.dorm = dorm
+
+    ... this will:
+
+        1) declare a new type of data structure called "Student" which
+        is a class, but similar in spirit to a "struct" in C
+
+        2) declare a function that by convention must be called "init"
+        that takes as its first argument a keyword called "self"
+
+        3) implicitly declare something called "name", and something
+        called "dorm"
+
+    ... the def __init__(self, name, dorm): statement is interesting --
+    basically, you have to use certain syntax but you can have any
+    number of arguments:
+
+        def __init__(self, arg1, arg2, etc.):
+
+    ... additionally, this line of code technically represents a method
+    insofar as it is inside of a class -- when not inside of a class,
+    it would be considered a function. Methods and functions are
+    basically the same thing, it's just that methods exist within
+    a class
+
+    ... so essentially, the method "init" takes whatever "self" is (not
+    explained here just yet), and zero or more number of additional
+    custom arguments that you can name and define
+
+    ... the special function "init" is going to be called automatically
+    for you anytime you create a Student object/class -- somehow, this
+    allows you to create a student in memory by including something
+    like this in your code:
+
+        s = Student(name, dorm)
+
+    ... which translates to -- the variable 's' gets Student, passing in
+    "name" and "dorm"
+
+    ... this feature is not present in C, I guess because a single
+    variable in C can only hold a single value, whereas in this example
+    it looks like a single variable can hold a class which is comprised
+    of multiple values -- variables in python can hold multiple values
+    of an object or class, which can be large and complex, and it's also
+    handling all of the memory management
+
+NAMED PARAMETERS in PYTHON
+---------------------------------------------------------------------
+- x
+
+WEBSERVERS in PYTHON
+---------------------------------------------------------------------
+- So in HTTP, when a request to view a webpage is sent out in a sort of
+    "digital envelope" that would have something like this written on the
+    outside:
+
+        GET / HTTP/1.1
+        Host: www.facebook.com
+        ...
+
+    ... so this information is the "protocol", or "hand-shake" information
+    that is being used to request information from www.facebook.com.
+    This type of information is also referred to as "headers".
+
+- When a request has been received by a server (a server which is
+    actively listening for requests), send the "digital envelope" back
+    to the client that made the request with a status code inside of the
+    envelope (ie. 404 NOT FOUND, 200 OK, etc.) and it may look something
+    like this:
+
+        HTTP/1.1 200 OK
+        Content-Type: text/html
+        ...
+
+    ... along with some other type of headers. The content that comes
+    afterwards is more interesting -- it's the actual pieces of the file
+    that are being sent from the server to the client
+
+- Another header used in HTML is POST -- this is usually used with forms.
+    The main difference between GET and POST is that GET will potentially
+    show everything a user types into the URL, while POST will hide it.
+
+- Python can be used to generate HTML, which allows websites to become
+    dynamic. It can also be used to implement a program that can be used
+    as a webserver. An example may look something like this:
+
+        ... (earlier lines are in the file serve.py under lecture_notes)
+
+       # configure server
+       port = 8080
+       server_address = ("0.0.0.0", port)
+       httpd = HTTPServer(server_address, HTTPServer_RequestHandler)
+
+       # run server
+       httpd.serve_forever()
+
+    ... so in this example, port is a variable whose datatype is int
+    (you don't have to specify the variable type in python),
+
+    ... server_address is a variable whose datatype is a "tuple" -- it is
+    reminiscent of an ordered pair in mathematics, and can be any
+    number of things within the parenthesis. In this case it's a double,
+    but with 3 things it would be a triple, etc. Anyways, this variable
+    stores the values that are used in with the IP/TCP protocol.
+
+    ... httpd is a variable meaning "http daemon", and with computers
+    the word "daemon" refers to a program that runs as a background
+    process rather than being under the control of an interactive user.
+
+    ... HTTPServer() is an object, which in this case is like a special
+    kind of struct that implements a webserver and passes in 2
+    arguments: the server address, and some other weird things
+
+    .. httpd.serve_forever() says that inside of the variable httpd there
+    is a function (aka, a "method") called serve_forever() that literally
+    serves forever, listening to requests and running in the background.
+
+- So, a webserver is literally a piece of software that sits on a
+    machine somewhere that listens for HTTP requests coming in from the
+    internet. As soon as it "hears" a request, ex. GET /, it then
+    responds to those requests by serving up content
+
+- Flask is a popular webserver program (or more technically, a micro-
+    framework because it's a small amount of code)
+
+DICTIONARIES in PYTHON
+---------------------------------------------------------------------
+- Python has build-in support for dictionaries, allowing you to specify list
+    indices with words or phrases (keys), instead of integers (which you were
+    restricted to in C)
+
+- Dictionaries in python are generally close in spirit to a hash table -- it
+    allows you to name/associate indicies with "keys" and not just integers
+    (to rephrase what I just typed above)
+
+- Here is a dictionary of pizzas containing the name of the pizza in quotes,
+    and the corresponding price of the pizza. In this example, the pizza name
+    would be the key, and the price would be the value:
+
+        pizzas = {
+            "cheese": 9,
+            "pepperoni": 10,
+            "vegetable": 11,
+            "buffalo chicken": 12
+        }
+
+- You could later change the value (price) of one of the keys (pizza name) with
+    something like this:
+
+        pizzas["cheese"] = 8
+
+    ... which allows you to manually change values in the "pizzas" dictionary.
+
+- You could create a conditional statement that evaluates a value (price) that
+    is associated with a key (pizza name) within a dictionary (pizzas):
+
+        if pizzas["vegetables"] < 12:
+            # do something
+
+- You could add a key (pizza name) to the dictionary (pizzas):
+
+        pizzas["bacon"] = 14
+
+- So the question arises: if the keys (pizzas) in the dictionary aren't indexed
+    using numbers then they aren't ordered, so how do you index through a
+    dictionary? You could sort the keys alphabetically first, but that takes
+    time & could get messy.
+
+- Fortunately, in python you can use the FOR loop for many purposes -- it is
+    extremely flexible and not just restricted to iterating over integers. So
+    for example, instead of saying:
+
+        for x in range(500):
+
+    ... you can also say stuff like
+
+        for pie in pizzas:
+            # use pie here as a stand-in for 'i'
+
+    ... this sort of transforms anything in the "name": format into a key, ex.
+    "cheese": makes cheese a key, "pepperoni": makes pepperoni a key, etc.
+
+    ... each pizza name becomes the pie'th key, if that makes sense, and the
+    FOR loop will simply iterate over each pie'th key in the pizzas{}
+    dictionary. In other words, it doesn't matter whether or not the keys in
+    a dictionary are ordered by number, or alphabetically, because the FOR
+    loop in python can go over each key.
+
+    ... in essence, whatever random order the keys appear to be in doesn't
+    matter -- python will iterate over them all. This is why, in the previous
+    example, you could say that whatever apparently random order the keys are
+    currently in -- which could change depending on random memory management,
+    moving data in memory, etc. -- you can iterate through each pie'th
+    value/key using a FOR loop)
+
+- You can also navigate both a dictionary's keys (pizza name) and values
+    (price), but in order to do so you must transform the pizzas{} dictionary
+    into a library using the .items() method/function. In doing so, however,
+    the way in which the data are ordered is not maintained -- once the
+    elements of a dictionary are transformed into a list, the order is lost.
+    For example:
+
+        for pie, price in pizzas.items():
+            print(price)
+
+    ... so what this does is iterate over all of the pie'th keys in order to
+    print all of the "price" values after pizzas{} has been transformed from a
+    dictionary into a list, and the output will potentially be an unordered
+    list of prices (lists are essentially arrays). The transformation from
+    dictionary to list is temporary.
+
+- Basically, using a FOR loop to iterate over keys keeps things in order, but
+    iterating over both keys -and- values requires you to use the .items()
+    method and the results are unordered.
+
+- If you wanted to iterate over both the keys and values in a dictionary, you
+    could just slightly modify the print() function, and -interpolate- the
+    price values, which are integers, into a string:
+
+        for pie, price in pizzas.items():
+            print("A whole {} pizza costs ${}".format(pie, price))
+
+    ... or you could concatenate strings together without interpolation --
+    specifically, you're converting price (an int) into a string, and then
+    concatenating it:
+
+        for pie, price in pizzas.items():
+            print("A whole" + pie + " pizza costs $" + str(price))
+
+FUNCTIONS in PYTHON
+---------------------------------------------------------------------
+- So, python doesn't have a main() function by default -- you have to
+    specify one
+
+- Python has support for functions as well. Like variables, we don't need to
+    specify the return type of the function (because it doesn't matter), nor
+    the data types of any parameters
+
+- All functions are introduced with the 'def' keyword
+
+    > also, there is no need for main() -- the interpreter reads from top to
+        bottom
+
+    > if you wish to define main() nonetheless (and you might want to because
+        the first function that you want to execute is like in the middle of
+        the code), you must include something like this at the end of your
+        code:
+
+            if __name__ == "__main__":
+                main()
+
+        ... where main() is the first function to be executed. However, you
+        could rename it to whatever you want, what matters is that it gets
+        executed first.
+
+- Some examples of definining functions using mathematical operators:
+
+    > def square(x):
+        return x * x
+
+    ... squares a number (ie. x ^ 2)
+
+    > def square(x):
+        return x ** 2
+
+    ... squares a number (ie. x ^ 2)
+
+    > def square(x):
+        result = 0
+        for i in range(0, x):
+            result += x
+        return result
+
+    ... adds 'x' to itself 'x' number of times (ie. convoluted x ^ 2)
+
+- As mentioned before, it doesn't really matter how to function works, so long
+    as it outputs the correct results.
+
+OBJECTS in PYTHON
+---------------------------------------------------------------------
+- Python is an object-oriented programming language
+
+- An object is sort of analogous to a C structure
+
+- In C, structures contain a number of "fields" which are all tied together
+    into a (hopefully) useful construct, but the fields themselves don't
+    stand alone. For example, if a struct has an int and a char field,
+    those int and char fields are always tied together and associated with
+    one another.
+
+- Objects in python have "fields" as well, but they're called "properties".
+
+- Objects in python can also have "methods", which are basically just
+    functions, and these methods are similarly inherent to the object and
+    mean nothing outside of it. You can define the methods inside of the
+    object -- thus, in python, "properties" and "methods" don't stand alone or
+    apart from object, anymore than the individual properties of a struct in C
+    stand alone.
+
+- In a way, the idea of "object-oriented" programming is important because
+    the concepts of "properties" and "methods" are permanently tied to
+    Objects -- outside of this context, properties and methods don't mean
+    anything and cannot be used (now I'm just reiterating what has been said).
+
+- In C, you could take a struct (which is basically a complex variable) and
+    pass it into a function (I think? Need to 2x check).
+
+- In python, objects don't get passed into a function. Instead, we call
+    .method()'s on objects (which is the general syntax in a lot of OOP
+    languages -- object oriented programming languages).
+
+CREATING OBJECTS in PYTHON
+---------------------------------------------------------------------
+- You can create objects using the "class" keyword in python
+
+- Classes require an initialization function, also more generally known as
+    a "constructor", which sets the starting values of the properties of the
+    object (we didn't have to do this in C). What it basically does is create
+    an object and assigns the values of the properties automatically -- this
+    is necessary, because in python you can only declare variables by
+    assigning them a value immediately (initializing a variable).
+
+- While the object is being constructed, you also have to define the methods
+    that can later be applied to the object.
+
+- In defining each method of an object, "self" should be its first parameter,
+    which stipulates on what object the method is called -- cannonically,
+    every method uses "self" as its first parameter, although you can call it
+    something else -- and all does is reference the object to which it is a
+    part of.
+
+- People use "self" so that they have an idea of which object they
+    are talking about. In other words, if you were an object, and your arms
+    and legs were methods, anything that happened to them (any arguments that
+    got passed to them) would ultimately affect you, or your "self". So that
+    is sort of why methods take "self" as the first parameter.
+
+- So basically, when you use "class" to create an "object", the constructor
+    as well as each method within the object will have 1 more parameter than
+    you think you need. For example:
+
+        class Student():
+
+            def __init__(self, name, id):   # constructor / method
+                self.name = name            # property
+                self.id = id                # property
+
+            def changeID(self, id):         # method
+                self.id = id                # property
+
+            def print(self):                # method
+                print("{} - {}".format(self.name, self.id))
+
+    ... so the elements of this are as follows:
+
+        1. class creates an object named Student()
+
+        2. def __init__ is the constructor, which initializes the object
+            Student() and takes 3 arguments, the first of which is "self" in
+            order to reference itself
+
+        3. The Student() object then has 2 properties, 'name' and 'id'.
+
+        4. Later on, the .changeID() method can be used to re-assign the
+            self.id property to something else
+
+        5. Lastly, the print() method is created which can be used to call the
+            print() function, the one that exists outside of this Student()
+            object
+
+- To use this newly created object, you could type something like this:
+
+        jane = Student("Jane", 10)
+        jane.print()
+        jane.changeID(11)
+        jane.print()
+
+    ... so what's happening is that the object Student("Jane", 10) is used to
+    create a class named "jane", passing in the arguments "Jane" and 10 --
+    "Jane" being assigned to the self.name property, and 10 being assigned to
+    the self.id property. Next, the .print() method is called from the class
+    "jane". Afterwards, the .changeID(11) method is called, passing in 11 as
+    an argument. Finally, .print() is called again
+
+MISC
+---------------------------------------------------------------------
+- You can write and test short python snippets using the python interpreter
+    from the command line -- all that is required is that the python
+    interpreter is installed on the system you wish to run your python
+    programs on.
+
+- You can also make your programs look a lot more like C programs when they
+    execute by adding a "shebang" to the top of your python files, which
+    automatically finds and executes the interpreter for you:
+
+        #!/usr/bin/env python3
+
+    ... if you do this, you need to change the permissions on your file as
+    well as using the Linux command chmod as follows:
+
+        chmod a+x <file>
+

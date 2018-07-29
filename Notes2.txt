@@ -1,0 +1,1477 @@
+-   pset4   ---------------------------------------------------------
+
+STRINGS
+---------------------------------------------------------------------
+- The concept of a "string" is used in C programming, but the language
+    itself doesn't have the idea of a "string" as a built-in construct. So
+    far, strings have been represented as any number of characters that
+    occur back-to-back, separated by the null terminator \n. But really,
+    there is no such thing as a "string" in C.
+
+- So for most of the topics discussed so far, information is basically
+    stored back-to-back and is sorted left-to-right, or right-to-left, or
+    in the case with "merge sort" and "binary search", the data is sort of
+    divided in the middle, and then continually divided (which can be
+    represented with recursive functions), but there are more sophisticated
+    ways of accessing memory. These other ways, or methods of accessing
+    or otherwise working with memory can be thought of as "data structures".
+
+- As a note, if someone uses the "get_string" function from the cs50.h
+    library, and it prompts the user to enter a string, and the user
+    simply hits "ENTER", then the strlen() of that input value is 0.
+    However, the result is -still- stored in memory as the null
+    terminator, or /0, and that occupies 1 byte (or 8 bits) of memory.
+    So in a weird way, although a string is created of zero length, it
+    still occupies 1 byte of memory. So for instance, if you tried to
+    access that byte (ie. array[0]), it will access that null terminator
+    /0.
+
+- So, the concept of a "string" in C doesn't really exist. What is really
+    being utilized is a concept called char *, or "char star".
+
+DATA STRUCTURES
+---------------------------------------------------------------------
+- Data structures are constructs that allow you to interact with computer
+    memory in interesting ways, and not just with the linear approach
+    that has been used so far.
+
+- Previously, several algorithms were discussed that are used to either
+    sort data, or retrieve data (ie, search for data) that have a linear
+    approach -- they literally treat data as a linear string, usually
+    within an array, that can be manipulated, moved, or otherwise accessed.
+    These included:
+
+    > linear search
+    > binary search
+    > bubble sort
+    > selection sort
+    > insertion sort
+    > merge sort
+
+- The approximations of running time, from slowest to fastest, are:
+
+    > n^2
+    > n * log(n)
+    > n
+    > log(n)
+    > 1
+
+POINTERS
+---------------------------------------------------------------------
+- A "pointer" is simply the address of something in memory. You can sort
+    of literally think of it as pointing at something. A long example
+    follows to explain this in more detail.
+
+- So the visual representation of how data is stored in memory so far isn't
+    entirely accurate. It does tend to get stored in lines, back-to-back,
+    but there's a little more complexity to it. A crude graph below might
+    represent this:
+
+        ----------------------
+                text
+        ----------------------
+           initialized data
+        ----------------------
+          uninitialized data
+        ----------------------
+                heap
+                  |
+                  |
+                  V
+
+                  ^
+                  |
+                  |
+                stack
+        ----------------------
+        environment variables
+        ----------------------
+
+- The two salient features here are the "stack" and the "heap". Stack is
+    what you'd think it is -- just a stack of things. The heap portion is
+    a little different; however, within the general area of "heap" stuff,
+    data is still ordered in a linear fashion -- the bytes are still
+    numbered, etc. The same goes with the stack general area, the bytes
+    are still numbered.
+
+- Going back to the get_string() function, a more "graphical"
+    representation of that function (from within hte cs50.h library) might
+    look something like this:
+
+        string s    =   get_string("Enter a string: ");
+
+        s _____     =   Stelios\0
+         |     |
+         |_____|
+
+    ...where the weird-looking box on the left, named 's', holds the
+    information on the right, "Stelios\0". Another way of visualizing
+    "Stelios\0" as an array of characters would be:
+
+         ________________
+        |S|t|e|l|i|o|s|\0|
+        ``````````````````
+
+    ...where each character in his name takes up 1 byte (8 bits), with
+    each character being some ASCII character. Wherever the are in memory,
+    they are indexed somehow; index 0, 1, 2, etc.
+
+- So for example, if Stelios\0 were stored in memory, and let's say there
+    were some things stored before it (and maybe some stored after it,
+    doesn't matter), and the "Stelios" array was inserted back-to-back as
+    you would expect, for the sake of example it may be stored at location
+    or address 100. If this were the case, then string s, which is an
+    array with its own internal index (ie. 0, 1, 2, etc.) would also have
+    an address within the memory of the chip it was stored in -- a chip with
+    its own internal memory. So the first character of "Stelios", which is
+    'S', would be located at array[0]. But the entire array, or array[],
+    might be located at 100 in memory.
+
+- So an algorithm in C that searches a chunk of memory for a specific
+    string would go to an address (which would be the character that is
+    directly after the null terminal \0). And depending on what it wants
+    to do, it can continue to search from that point on and search every
+    character in memory back-to-back (if it is interested in examining
+    each specific character in that string), or it can skip ahead to the
+    next character following a null terminator.
+
+- The advantage of this is that in order to logically store a string, all
+    you really need to know is where that string begins. This doesn't
+    completely identify the string, but it helps in searches when you are
+    trying to weed out strings that don't match what you're looking for --
+    if they don't match the first character, then the program moves on
+    and doesn't waste resources analyzing every character in the string.
+
+- Since the first character can be used to somewhat identify an entire
+    string, it's efficient because it may only use up a few bytes --
+    maybe 4 bytes, or 8 bytes (or maybe 1 byte?).
+
+- Here's an example of two strings being compared:
+
+    string s    =   get_string("s: ");
+
+        s _____     =   Stelios\0
+         |100  |
+         |_____|
+
+    string t    =   get_string("t: ");
+
+        t _____     =   Stelios\0
+         |     |
+         |200__|
+
+    ...what this is trying to show is that if the user inputs "Stelios"
+    when prompted to input something for both 's' and 't', the first
+    input may be stored at location 100 (it could be stored anywhere, this
+    is just an example). The second input may be stored at location 200.
+    So in this example, the 's' variable has a "pointer" that targets
+    location 100, and the 't' variable has a "pointer" that targets
+    location 200.
+
+- One of the side-effects of this whole...storage phenomena is...let's say
+    you write a function that takes two strings as input, compares them,
+    and then lets you know whether or not they are the same string. You
+    could type the same thing for both inputs, but the function may
+    give you a result that suggests that the characters that you typed in
+    are not the same. Even if you typed in the same thing twice, verbatim.
+    This is because the "pointer" is aimed at two different addresses in
+    memory.
+
+- Because of how strings are stored in memory, although they may be
+    comprised of the same characters, integers, "strings" (strings are
+    just sequences of characters), the computer may not identify them as
+    equal upon comparison due to the fact that they are stored in
+    different locations. It's like comparing Mike Smith at 400 Grace St.
+    to Mike Smith at 1732 E. 2nd St.
+
+- Anyways, this allows you to talk about 's' or 't' instead of "s at
+    location 100" or "t at location 200", since the compiler figures out
+    where to store this stuff in memory.
+
+- So these "strings" are just synonyms for char *. So, humans long ago
+    arbitrarily decided that the star, or *, in char * would represent
+    an address, a pointer, a location (all are basically the same thing).
+    The "char" component is relevant because it means that the pointer,
+    *, is pointing -to- a char, or character, and this character
+    represents the address.
+
+- So, by defining 's' and 't', what's really happening is that these
+    variables are pointing -to- a single character, specifically the first
+    character in what we used to call a "string".
+
+- There is a function called strcmp() that leverages this concept to
+    actually compare the first character in two different locations. If
+    they are the same, it moves to the second character -- again, in two
+    different locations in memory, but it is somehow ignoring the location
+    in memory and only focusing on the individual characters. It keeps
+    checking each character until either there is a mismatch, and it
+    returns false, or it reaches the null terminator /0 and returns
+    true. Specifically, strcmp() returns 0 if true, -1 (or some negative
+    number) if the individual character in the first argument comes
+    -before- the second character alphabetically, or +1 (or some positive
+    number) if the character in the first argument comes -after- the
+    second character alphabetically.
+
+- The function strcmp() uses char *.
+
+- NUL is the word that people gave to \0
+
+- NULL is
+
+- If a program successfully runs, then int main() will return 0. If
+    something goes wrong, int main() will return some other number --
+    could be 1, 2, -1, 5, etc.
+
+- Let's say you wanted to copy a string from one location to another. The
+    line of code used to create some space for this variable may look like
+    this:
+
+        char *t = malloc((strlen(s) + 1) * sizeof(char));
+
+    ...where:
+
+        > char *t: in this case, *t will store the address of the
+        memory allocated by malloc()
+
+        > malloc: stands for "memory allocation". It takes 1 argument --
+        the number of bytes you want, regardless of what operating sytem
+        is running. So for example, malloc(5) would find a chunk of
+        memory somewhere in RAM of 5 identically-sized back-to-back bytes,
+        and it would then return the address of the beginning of that
+        chunk of memory. For example:
+
+            1. malloc(5) finds a chunk of memory that is 5 bytes long, and
+            it starts at location 203 in the computer's memory
+
+            2. malloc(5) returns the address of 203 and allocates 203,
+            204, 205, 206, and 207 to be used for whatever purpose --
+            it is generic, and has no preference for characters, integers,
+            or otherwise; however, before they are actually given values,
+            they may contain "garbage values" -- information leftover from
+            some previous operation or something like that
+
+            3. malloc(5) does not automatically assign the null terminator
+            /0 -- it's basically like renting out storage space, you can
+            put whatever you want into the bytes that are allocated by
+            malloc().
+
+        > strlen(s) + 1: this sets the number of bytes to be allocated
+        to the length of a "string" + 1, in order to allow an extra space
+        for the null terminator /0
+
+        > sizeof(char): just to be safe, multiply strlen(s) + 1 by the
+        size of a character, which is 1 byte (or 8 bits), just to be
+        absolutely sure that you get both the number of bytes that you
+        want + 1, and that each byte is in fact equal to sizeof(char)
+
+- To put things another way, a "string" is simply the address of a single
+    character, ie. char *
+
+- Up until now, we have been using the syntax for an array for various
+    things, but mostly to iterate through each character of a "string".
+    For example:
+
+        for (i = 0, n = strlen(x); i < n; i++)
+        {
+            printf("The ith character is %c\n", x[i]);
+        }
+
+    ...shows that for string 'x', each i'th character will be printed out
+    followed by a newline \n, for the duration of the length of the string,
+    or strlen(x).
+
+- The syntax for an array, which is array[], is considered to be "syntactic
+    sugar" and is just a nice way of expressing what is going on in the
+    language, sort of like i++. In the above example, the syntax for the
+    array x[i] could also be written as:
+
+        *(x + i)
+
+    ...so in essence, x[i] is the same as *(x + i). This is because the
+    start character, or asterisk *, references the location of the string
+    x in memory -- and recall that a "string" is really just the address
+    of the first character. In this case, *x would be the location of the
+    "string" x in memory, or more precisely, the location of the -first
+    character- in "string" x. So, *(x + i) is basically adding the i'th
+    value to the location of *x through each iteration -- and essentially
+    allows you to print each character, starting at *x.
+
+- Pointer arithmetic: this is basically what was just described above --
+    *(x + i) is an example of pointer arithmetic.
+
+- The use of star, or asterisk, or *, has even more connotations depending
+    on the context within which it is used. The first use is in
+    multiplication. The second use is in declaring the address of a string
+    or, more precisely, the location of the first character in the string,
+    using char *, or char-star. However, the syntax -also- allows you
+    to declare a variable. So for example,
+
+        char *s = whatever;
+
+    ...is declaring a variable named 's', -and- also assigning the location
+    of that variable to 's' at the same time. Specifically, a pointer
+    variable that points to that type of data type, in this case, to the
+    address of a character.
+    ...the third use is as in the example above, *(s + i), where it is not
+    involved in multiplication, and there is no data type to the left of
+    it (ie, char *s), but it is somehow associated with the parenthetical
+    expression to its right. In this context, it simply tells the computer,
+    "Go to that address." it isn't assigning or creating a variable, and
+    it's not involved in multiplication -- it's somewhat similar to a
+    GOTO command.
+
+- In other words, char *s is creating a character 's' and is basically
+    telling the computer, "Give me a pointer to a character named 's', and
+    use that as the location or starting point to evaluate anything that
+    comes aftewards". However, *(s + i), or *(some expression), is telling
+    the computer, "Go to, or poitn to the address of *(wherever)".
+
+- To recap: pointers provide an alternative way to pass data between
+    functions. Recall that up to this point, we have passed all data
+    "by value" with one exception (arrays). When we pass data by value,
+    we only pass a copy of that data.
+
+- If we use pointers instead we have the power to pass the actual
+    variable itself. That means that a change that is made in one function
+    -can- impact what happens in a different function. Previously, this
+    wasn't possible!
+
+- Pointers & memory: every file on your computer lives on your disk drive,
+    be it a hard disk drive (HDD) or a solid-state drive (SSD).
+
+- Disk drives are just storage space; we can't directly work there.
+    Manipulation and use of data can only take place in RAM, so we have to
+    move data there. However, when the computer turns off, all of the data
+    in RAM is destroyed -- that's why it's necessary to have storage space.
+
+- Memory is basically a huge array of 8-bit wide bytes, ie. 512 MB, 1 GB,
+    2 GB, etc.
+
+- All data types take up different amounts of space in RAM. For example:
+
+    data type    | size (in bytes) | description
+    ----------------------------------------------------
+        int             4           integer
+        char            1           single character
+        float           4           float (real number)
+        double          8           double precision float (real number)
+        long long       8           really big integers
+        string          ??
+
+- Back to this idea of memory as a big array of byte-sized cells -- recall
+    from our discussion of arrays that they not only are useful for
+    storage of information, but also for so-called "random access". We can
+    access individual elements of the array by indicating which index
+    location we want -- in other words, you don't have to start at the
+    beginning of an array[] and iterate through every single element
+    until you get what you want, you can target a specific location
+    witin the array[], aka, "random access" a specific location.
+
+- Similarly, each location in memory has an -address-.
+
+- The most important thing to remember is: pointers are just addresses.
+    To illustrate:
+
+         int k;
+         k = 5;
+
+          _____
+         |  5  |
+         '''''''
+            k
+
+    ...what this tries to illustrate is that int k; establishes a "box",
+    or a space in memory where an integer can exist. k = 5; places the
+    integer '5' within the box.
+
+         int k;              int* pk;
+         k = 5;              pk = &k;
+
+          _____             ____________
+         |  5  |           | 0x80C74820 |
+         '''''''           ''''''''''''''
+            k                    pk
+
+    ...so int* k; also establishes a "box", but pk = &k; did something
+    that looks crazy. What's happening is that 'pk' gets the address of
+    'k' -- so the hexidecimal that gets stored in 'pk' is just an
+    address, or &k. To put it another way, pk gives us the information
+    that we need to find 'k' in memory. When 'k' was established it was
+    given an address -- the one in the example above is arbitrary, any
+    address could have been given. But what pk, or more precisely, what
+    '&k' allows us to do is "point" to the address of 'k'.
+
+- So, a pointer is a data item whose value is a memory address (ie,
+    0x80C74820) and whose type describes the data located at that memory
+    address. As such, pointers allow data structures and/or variables to
+    be shared among functions. Pointers make a computer environment more
+    like the real world.
+
+- The simplest pointer available to us in C is the NULL pointer. As you
+    might expect, this pointer points to nothing (a fact which can
+    actually come in handy!)
+
+- When you create a pointer and you don't set its value immediately, you
+    should -always- set the value of the pointer to NULL
+
+- You can check whether a pointer is NULL using the equality operator
+    (==).
+
+- Another easy way to create a pointer is to simply -extract- the address
+    of an already existing variable. We can do this with the address
+    extraction operator (&) -- which we've done before in the example
+    above.
+
+- If 'x' is an int-type variable, then &x is a pointer-to-int whose
+    value is the address of 'x'.
+
+- If 'arr' is an array of doubles, then &arr[i] is a pointer-to-double
+    whose value is the address of the ith element of arr. Note: an array's
+    name, then, is actually just a pointer to its first element -- you've
+    been working with pointers all along! An array's name is really just
+    a pointer. The square bracket syntax, [], is basically "syntactic
+    sugar" and is used to make them seem less intimidating. This is why
+    when an array is passed as a parameter/argument to a function, it is
+    "passed by reference" -- you are using a pointer, so it changes the
+    actual values in their specific addresses or locations in memory, and
+    not simply changing copies of those values. Again, the name of an
+    array is actually a pointer to the first element in that array.
+
+- The main purpose of a pointer is to allow us to modify or inspect the
+    location to which it points. We do this by "dereferencing" the
+    pointer -- you go to the value at the pointer and change the value
+    right there, at its address. "Dereferencing" is basically going to
+    a variable's location in memory and inspecting its value, changing it,
+    or otherwise interacting with it in some way. It's like going to
+    someone's house.
+
+- If we have a pointer-to-char called 'pc', then *pc points to
+    the data that lives at the memory address stored inside the
+    variable 'pc'.'
+
+- Used in this context, * is known as the "dereference operator".
+
+- It "goes to the reference" and accesses the data at that memory
+    location, allowing you to manipulate it at will.
+
+- This is just like visiting your neighbor. Having their address isn't
+    enough. You need to -go to- the address and only then can you
+    interact with them.
+
+- What happens if you try to dereference a pointer whose value is NULL?
+    Usually a segmentation fault occurs. However, as mentioned earlier,
+    if you do not immediately set your pointer to something useful as
+    soon as it is declared, it's considered good practice to set it to
+    NULL -- so why is a segmentation fault a good thing in this case?
+    Surprisingly, this is actually good behavior! It defends against
+    accidental dangerous manipulation of unknown pointers. That's why
+    they recommend to set your pointers to NULL immediately if you
+    aren't setting them to a known desired value -- the pointer may point
+    to some random thing in memory, dereference it, change it, and screw
+    stuff up. That's why it's important to make sure that you know
+    exactly what your pointers are dereferencing so that they don't do
+    something malicious to another function. At the end of the day,
+    it's probably better for your program to crash rather than screw
+    up another program.
+
+- Taking an overall look at the syntax:
+
+        int* p;
+
+    1. the value of 'p' is an address (ex. 0x80C74820)
+    2. we can dereference 'p' with the * operator, with * being part of
+        the data-type
+    3. if we do, what we'll find at that location is an int
+
+- One more annoying thing with those *'s -- they're an important part of
+    both the -type name-, AND the -variable name-. For example:
+
+        int x, y, z;
+
+    ...would create 3 integers named 'x', 'y', and 'z'. However:
+
+        int* px, py, pz;
+
+    ...will create 1 pointer-to-int named 'px', and then 2 integers named
+    'py' and 'pz'. In order to create multiple pointers on the same line,
+    you would write something that looks like this:
+
+        int* px, *py, *pz;
+
+- Back to strings -- there is no data type called "string" in C by
+    default, the get_string() function in the cs50.h library is just an
+    abstraction. Strings are really just something called char* (or char
+    star). Since char* is a pointer, "strings" are really just an alias.
+    Pointers are just addresses, so what is the size (in bytes) of a
+    string? Here's the data type/size table again:
+
+        data type | size (in bytes) | description
+    ----------------------------------------------------
+        int             4           integer
+        char            1           single character
+        float           4           float (real number)
+        double          8           double precision float (real number)
+        long long       8           really big integers
+        string          ??          -doesn't exist really-
+        char*           4 or 8      location in memory, datatype char
+
+    ...the size of char* depends on the system -- in cs50 IDE, the size
+    is 8 bytes (or 64 bit system), meaning every address is 8 bytes long.
+    If you're using cs50 appliance (or any 32 bit machine) then every
+    address is 4 bytes (or 32 bits) long. And actually, any data type
+    that is a pointer to an address is either 4 or 8 bits long:
+
+        data type | size (in bytes) | description
+    ----------------------------------------------------
+        char*           4 or 8      location in memory, datatype char
+        int*            4 or 8      location in memory, datatype int
+        float*          4 or 8      location in memory, datatype float
+        double*         4 or 8      location in memory, datatype double
+        etc.
+
+- To conclude, instead of using datatype*, what happens if you attach
+    the * to a variable? For example:
+
+        *pk = 35;
+
+    ...since * is the dereferencing operator, *pk = 35; will go to the
+    address of 'pk' and change it to 35. To use the previous example:
+
+         int k;              int* pk;
+         k = 5;              pk = &k;
+
+          _____             ____________
+         |  5  |           | 0x80C74820 |
+         '''''''           ''''''''''''''
+            k                    pk
+
+    ...sets up an environment where 'k' is a chunk of memory that
+    currently holds the value '5'. int* pk; establishes a pointer named
+    'pk', and pk = &k; points to the address of 'k'. Finally, *pk = 35;
+    dereferences 'pk' and assigns the value of '35' -- however, 'pk
+    itself is a pointer and dereferences 'k' and over-writes the value
+    of '5' by changing it to '35'.
+
+- One more example -- consider the following scenario:
+
+         int k;            int* pk;           int m;
+         k = 5;            pk = &m;           m = 4;
+
+          _____           ____________        _____
+         |  5  |         | 0x12345678 |      |  4  |
+         '''''''         ''''''''''''''      '''''''
+            k                  pk               m
+
+    ...what has changed is that pk = &m; it is now pointing to the address
+    of 'm' instead of 'k' -- the address of 'pk' has no changed, and no
+    longer points to 'k', it now points to 'm'.
+
+SCANF()
+---------------------------------------------------------------------
+- In the cs50.h library, the functions get_string() and get_int() were
+    written to simplify getting input from a user. Without that library,
+    you can write your own code using scanf() (which is probably what
+    get_int() and get_string() are using anyways). For example, to get an
+    integer:
+
+        scanf("%i", &x);
+
+    ...where scanf() is a function that reads input, or scans input from
+    the keyboard/reads whatever what was typed in
+
+        > the 'f' in scanf() means "formatted", which means you can read a
+        certain type of input from the user, in this case %i, or an
+        integer
+        > the '&' character represents the -address- of a variable; in this
+        case '&x' would be the address of the variable 'x'.
+
+- The functions printf() and scanf() are sort of opposite -- printf()
+    goes out to the screen, scanf() comes in from the keyboard. However,
+    they use a lot of the same syntax, like %i, %c, etc.
+
+- Back to ampersand &, the syntax '&x', where x is some variable, simply
+    returns the address of x. So if 'x' had been declared earlier (ie.
+    int x;) then &x would return its address in memory.
+
+- So it becomes apparent that the purpose of scanf() is to take whatever
+    input is entered into the keyboard, whether it's %i, %c, etc., and
+    store that input at an address. For example:
+
+        int x;              // Creates variable 'x' in random location
+        printf("x: ");      // Prints "x: " to screen
+        scanf("%i", &x);    // Takes int input, stores at location of 'x'
+        printf("x: %i\n", x); // Prints results
+
+    ...so the most important concept here is that int x; gets stored at
+    any random location in memory, and scanf() puts anything typed into
+    the keyboard into that same random location using &x.
+
+STACK and HEAP
+---------------------------------------------------------------------
+- In the previous examples, when using malloc() to set aside memory to
+    be allocated for some specific purpose, that memory comes from the
+    top of the pile, or the "heap" (although technically, it could be at
+    the bottom...the point is that it's in a specific general area).
+
+- The "stack" portion of memory, however, is different -- the "stack" is
+    a region of memory where, anytime you call a function, the memory
+    for your local variables comes from the "stack", and you get like a
+    strip, or a sliver of memory from the so-called "stack", just like you
+    would get a tray off of a stack in a cafeteria or dining hall.
+
+- To be more specific, in any program in C, any local variables within
+    int main(void) go into the "stack". Any other functions also have
+    their local variables go into the "stack". However, each function has
+    a different strip, sliver, slice, or frame (however you want to call
+    it) of memory in the stack. A messy visual representation is below:
+
+        ----------------------
+                heap
+                  |
+                  |
+                  V
+
+                  ^
+                  |
+                  |
+                stack
+        ----------------------
+
+- In the noswap.c example, the local variables for int main(void) which
+    are 'x' and 'y' have their own strip of memory, or "stack frame", in
+    which they are stored. The local variables for void sawp(int a, int b)
+    'a' and 'b', as well as the variable declared within the swap()
+    function named 'tmp', all have their own strip of memory, or "stack
+    frame". However, when the program executes, it follows as such:
+
+        swap(a, b)
+        main()      x 1     y 2
+        ----------------------------    > this is the "stack" of memory
+
+
+        swap(1, 2)  a 1     b 2
+        main()      x 1     y 2
+        ----------------------------    > main() calls swap(), passes 1, 2
+
+
+        swap(1, 2)  a 2     b 1
+        main()      x 1     y 2
+        ----------------------------    > swap() switches 'a' and 'b'
+
+
+        swap(1, 2)  a 2     b 1
+        main()      x 1     y 2
+        ----------------------------    > main() doesn't do anything
+
+    ...in this example, main() sits somewhere in its own "stack frame" and
+    passes the values 1 and 2 to the function swap(). A new "stack frame"
+    is created for swap(), where it converts the values (or arguments) 1
+    and 2 into variables 'a' and 'b'. Within the realm of swap(), within
+    its own "stack frame", the values of 'a' and 'b' are switched --
+    however, they are switched within the function swap(), and have no
+    effect on the 'x' and 'y' values within the function main(). In other
+    words, the values/arguments from main(), specifically x = 1 and y = 2,
+    are "passed by copy" to swap(), and any mutations or changes that the
+    swap() function makes on those values has no effect on main().
+
+- In another example, this shows how the the processes within one function
+    can affect the variables that are used in another function by
+    specifically calling the address of those variables -- aka, "pass by
+    reference"
+
+        swap(*a, *b)
+        main()      x 1     y 2
+        ----------------------------    > this is the "stack" of memory
+
+        swap(1, 2)  *a x    *b y
+        main()       x 1     y 2
+        ----------------------------    > main() calls swap(), passes 1, 2
+                                        > *a points to 'x'
+                                        > *b points to 'y'
+
+        swap(1, 2)  *a y     b x
+        main()       x 1     y 2
+        ----------------------------    > swap() switches 'a' and 'b'
+
+        swap(1, 2)  *a 2     *b 1
+        main()       x 2      y 1
+        ----------------------------    > main() & swap() have same pointers
+
+- So in this example, since *a and *b allow swap() to directly target,
+   or "point" at variables x and y and their specific locations in
+    memory, it is able to actually change the values via "pass by
+    reference" -- it changes the original values, and not just a
+    temporary copy that it sets up in some other strip/sliver/"stack
+    frame" in memory. It changes the original.
+
+- In essence, a function can -only- change another function's values
+    in memory if you give it a map to the locations of those variables.
+
+- This basically boils down to: get me the address of something using
+    ampsersand &, and go to the address using star *
+
+- By using the ampersand &, scanf() can go to any address that it
+    wants and put/store a value there.
+
+- Taking this concept one step further, you are not limited to storing
+    or retrieving data back-to-back. In other words, since the star, or
+    asterisk, or * character refers to a single character/int/whatever
+    in memory, you can use this to sort of stitch together different
+    pieces of data to do some pretty different and unique things.
+
+IMAGING
+---------------------------------------------------------------------
+- In computer imaging, if you think about each pixel being represented
+    as a 0 or 1, you're pretty limited in scope when it comes to presenting
+    an image (it's either 0 or 1, black or white, blue or red, etc.)
+
+- In a .jpeg, typically as many as 24 bits are used per pixel. This allows
+    for a lot more complexity (like, millions of combinations) and
+    expression of the colors on the visible color spectrum.
+
+- At the end of the day, any file is just a pattern of 0's and 1's. In the
+    case of .jpeg, what does it mean to be a .jpeg? Or with word documents,
+    what makes a file a word document? Or an excel file?
+
+- Generally, some human, or some company decided that a file is a .jpeg
+    "shall always start with the same few bits". Or maybe they decided that
+    it "shall always end with the same few bits". It's arbitrary, but some
+    kind of definition was established. The same goes with word documents,
+    or excel files, or anything.
+
+- The only way to write software that reads these files is to read the
+    documentation by the people who established these files, and the bits,
+    or bytes, or whatever it is that determines whether or not the file
+    is indeed a .jpeg, excel, or whatever, type of file.
+
+- This is why when you open a file in one type of software, like notepad
+    or word, and it's actually a .jpeg file, it might look like ASCII
+    characters and appear completely nonsensical. That's why the 0's and
+    1's are always context-sensitive -- they will usually only make sense
+    within the context of the software that is using them.
+
+- For example, if you open a .jpeg file, the first three bytes (or, the
+    first 24 bits) are 255 216 255 in decimal (or a bunch of 0's and 1's
+    in binary), per the documentation file for .jpeg's
+
+HEXADECIMAL
+---------------------------------------------------------------------
+- This is a counting system that goes from 0 to f:
+
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, f
+
+    ...where 0 through 9 represent 0 through 9, a represents 10,
+    b represents 11, ... f represents 15. "Hexa" means "16"
+
+- The weird thing about hexadecimal is that each character (0 - 9, a - f)
+    technically represent 4 bits, instead of 8
+
+- Why 4 bits? because if you have 4 bits, you have this many patterns:
+    2 x 2 x 2 x 2 = 16, ergo "hexa" decimal. The reason this is convenient
+    is because you can take 8 bits (or 1 byte) and separate them into
+    two hexadecimal values, each of which is 4 bits (this is convenient
+    for some reason, I'm not sure why).
+
+- For example, to show the binary values that give a file its .jpeg
+    identity:
+
+        255             | 216             | 255
+        1111    1111    | 1101    1000    | 1111    1111
+        f       f       | d       8       | f       f
+        0xff            | 0xd8            | 0xff
+
+    ...anything written in hexadecimal is pre-fixed with '0x..." as a
+    human convention. Just because, it's like a visual cue. So another
+    way of writing the first 3 bytes of any .jpeg in a file would be:
+
+        0xff 0xd8 0xff
+
+- Each number/character in hexadecimal corresponds to a combination of
+    four binary digits:
+
+        decimal     binary      hexadecimal
+        -----------------------------------
+        0           0000        0x0
+        1           0001        0x1
+        2           0010        0x2
+        3           0011        0x3
+        4           0100        0x4
+        5           0101        0x5
+        6           0110        0x6
+        7           0111        0x7
+        8           1000        0x8
+        9           1001        0x9
+        10          1010        0xA
+        11          1011        0xB
+        12          1100        0xC
+        13          1101        0xD
+        14          1110        0xE
+        15          1111        0xF
+
+- So for example, 397 in decimal is a base-10 number. However, 0x397 is
+    a totally different number:
+
+            256     16      1           16^2    16^1    16^0
+            -----------------   or      --------------------
+        0x  3       9       7       0x  3       9       7
+
+    ...so 0x397 in hexadecimal would be (3 x 256) + (9 x 16) + (7 x 1), or
+    768 + 144 + 7 = 919 in decimal.
+
+- To convert binary to hexadecimal, starting from the right and moving
+    left, group the binary numbers into groups of 4. Example:
+
+        01000110101000101011100100111101
+        0100 0110 1010 0010 1011 1001 0011 1101
+        4    6    A    2    B    9    3    D
+        0X46A2B93D
+
+-
+
+
+STRUCTURES
+---------------------------------------------------------------------
+- So far in C, we have only dealt with data types like int, char, char*
+    (aka "strings"), etc., but there are no real structures that we have
+    dealt with yet. We have no data type called "file" yet, or at least,
+    nothing like .jpeg.
+
+- As it turns out, there is a keyword in C called "struct", which is short
+    for "structure", and it gives structure to data. Arrays are not
+    sufficiently powerful enough to solve all problems effectively.
+
+- So in C, let's say you wanted to have an array[] of students. There is
+    no data type for students -- you could do something creative with
+    int's, char's, floats, etc. but it there is no "student" data type.
+
+- You can declare your own data type. For example:
+
+        typedef struct
+        {
+            string name;
+            string dorm;
+        }
+        student;
+
+    ...where "typedef struct" allows you to invent your own datatype,
+    which in this case is called "student". In this example, the datatype
+    "student" has associated with it a name and a dorm. In otherwords, the
+    datatype "student" has encapsulated within it 2 other known datatypes
+    -- string name, and string dorm. It could be integers, floats, or
+    anything else that you want.
+
+- Using "struct" allows you to build up structures that are more
+    meaningful than arrays, in that they can have multiple different
+    datatypes associated with them, all of which will be grouped together.
+
+- You can declare data structures like this, but you can also read them
+    from disk, read them from files, and then write them to files as well.
+
+CALL STACK
+---------------------------------------------------------------------
+- When you call a function, the system sets aside space in memory for that
+    function to do its necessary work. We frequently call such chunks
+    of memory "stack frames" or "function frames". So for example, if you
+    have a function that declares some variables, like integers, and let's
+    say you want to assign 3 integers, those integers will have 3
+    four-byte chunks of memory assigned to them, as well as some space
+    to do some calculations and whatever else the function might need.
+
+- More than one function's stack frame may exist in memory at a given
+    time. If main() calls move(), which then calls direction(), all
+    three functions have open frames. However, only 1 function will ever
+    be active at any given time.
+
+- These multiple stack frames exist in a "stack". The frame for the
+    most recently called function is always on the top of the stack.
+
+- When a new function is called, a new frame is "pushed" onto the top of
+    the stack and becomes the active frame.
+
+- When a function finishes its work, its frame is "popped" off of the
+    stack, and the frame immediately below it becomes the new, active
+    function on the top of the stack. This function picks up immediately
+    where it left off.
+
+- This is why recursion works -- although multiple stack frames may exist,
+    only 1 is running at any given time, the rest are sort of on pause,
+    waiting to run, but not actively running yet. For example:
+
+        int fact(int n)
+        {
+            if (n == 1)
+                return 1;
+            else
+                return n * fact(n - 1);
+        }
+
+        int main(void)
+        {
+            printf("%i\n", fact(5));
+        }
+
+    ...in this case, int main(void) is the first function that is executed.
+    When it gets to printf(), the next function, fact() is called -- in the
+    meantime, int main(void) is put on pause because it doesn't know what
+    fact() is just yet.
+    ...after int main(void) passes the value of '5' to the function fact(),
+    the function fact(5) performs the calculation 5 * (fact(4)). However,
+    as before, fact(5) doesn't know what fact(4) is just yet, so it calls
+    itself but passes the value of '4'.
+    ...after fact(5) passes the value of '4' to the function fact(), the
+    same thing happens as above --- fact() keeps calling itself until it
+    reaches fact(1), in which case the IF clause causes the function to
+    return 1, which is usually an error (functions return 0 when executed
+    successfully, any other number usually indicates an error). So when
+    each function is called that depends on the result of another function,
+    it is put on pause temporarily.
+
+- So when int main(void is initialized, there are actually 7 functions
+    that get their own "stack frame" and are placed in the "stack":
+
+        fact(1)
+        fact(2)
+        fact(3)
+        fact(4)
+        fact(5)
+        printf()
+        main()
+
+    ...with fact(1) being at the top of the stack. So what happens is that
+    fact(1) will return a value of '1', which means that the stack frame
+    for fact(1) is "popped off" of the call stack and its frame is
+    destroyed. This does 2 things, a) it signifies an error and b) it
+    actually returns the value of 1 to be used in fact(2)
+    ...next, fact(2) can execute and performs the calculation:
+
+        2 * fact(1)
+        2 * 1
+        2
+
+    ...next, fact(3) can execute and takes the value from fact(2), and so
+    on and so forth.
+
+FILE POINTERS
+---------------------------------------------------------------------
+- Up until this point, whenever a program is run there is usually some kind
+    of output, but if you clear your terminal there's no real evidence
+    that the program was ever executed & it's sort of lost. However, there
+    is a way to store information or data that is generated from running
+    programs.
+
+- The ability to read data from and write data to files is the primary
+    means of storing -persistent data-, data that does not disapear when
+    your program stops running.
+
+- The abstraction of files that C provides is implemented in a data
+    structure known as a FILE. Almost universally when working with
+    files, we will be using pointers to them, FILE*. Note that file
+    pointers, FILE*, and variable pointers are similar but there are some
+    minor differences.
+
+- The file manipulation functions all live in stdio.h, all of them accept
+    FILE* as one of their parameters, except for the function fopen(),
+    which is used to get a file pointer in the first place
+
+- Some of the most common file input/output (I/O) functions that we'll be
+    working with are:
+
+        fopen()
+        fclose()
+
+        fgetc()
+        fputc()
+
+        fread()
+        fwrite()
+
+    ...where fopen() and fclose() are companion functions, fgetc() and
+        fputc() are companion functions, and fread() and fwrite() are
+        companion functions.
+
+- fopen() opens a file and returns a file pointer to it. Note: always
+    check the return value to make sure you don't get back NULL. The
+    syntax is as follows:
+
+        FILE* ptr = fopen(<filename>, <operation>);
+
+    ...you want to make sure that the pointer that you get back is not
+    equal to NULL. If you try and "dereference" (explained below) a
+    pointer call, which is basically getting the value of a pointer
+    address, your program may suffer a segmentation fault. You want to
+    make sure that you get a legitmate pointer back.
+    ...where FILE* is the file pointer, ptr is the pointer value, fopen()
+    is the function that gets a pointer, <filename> is an argument that
+    gets passed which is the actual file, and <operation> is an argument
+    that is an operation that you want to undertake -- these are usually
+    short abbreviations (for example, "r" is an operation that reads the
+    file). For example:
+
+        FILE* ptr1 = fopen("file1.txt", "r");
+
+    ...in this example, the operation "r", or "read", is performed on the
+    file "file1.txt". Similarly, you could use "w", or "write", as an
+    operation, or "a" for "append". The difference between writing and
+    appending is that writing will over-write a file, while append just
+    adds stuff to the end of the file.
+
+- Dereference: a dereference operator, like *, that operates on a pointer
+    variable and returns a value equivalent to the value at the pointer
+    address. This is called "dereferencing" the pointer.
+
+- fclose() closes the file pointed to by he given file pointer. The syntax
+    looks like this:
+
+        fclose(<file pointer>);
+
+    ...in the above example, it would look like this:
+
+        fclose(ptr1);
+
+- fgetc() reads and returns the next character from the file pointed to.
+    fgetc() basically means "file get character". So, in the first call
+    to fgetc() you would get the first character, in the second call you
+    would get the second character, etc., and then store all of this
+    information in a character variable. In order for this operation to
+    succeed, the file pointer must have been open for reading. In other
+    words, note: the operation of the file pointer parameter must be "r"
+    for read, or you will suffer an error. The syntax is:
+
+        char ch = fgetc(<file pointer>);
+
+    ...in other words, you can't read a character from a file pointer that
+    you opened for writing -- it's sort of analogous to VIM being a modal
+    text editor -- in one mode you sort of move around and read/copy/move
+    text, and in the other mode you input, or write text.
+    ...this illustrates one of the limitation with fopen() -- you have to
+    restrict yourself to one operation, which is reading, or "r", with one
+    file pointer. If you want to read and write to the same file, you would
+    have to open to separate pointers to the same file -- one for reading,
+    and one for writing.
+    ...so if you're going to make a call to fgetc(), that file must have
+    been previously opened for reading. After that, all you have to do
+    is pass in the name of the file pointer.
+
+- The ability to get single characters from files, if wrapped in a loop,
+    means we could read all the characters from a file and print them to
+    the screen, one-by-one, eseentially. For example:
+
+        char ch;
+        while ((ch = fgetc(ptr)) != EOF)
+            printf("%c", ch);
+
+    ...we might put his in a file called cat.c, after the Linux command
+    "cat" which essentially does just this.
+    ...fgetc(prt) obtains one character from a file, starting at the file
+    pointer "ptr". That character is then compared against EOF -- EOF is
+    a special value that is defined in stdio.h which is the "end of file"
+    character. So what this does is read a character, starting at the
+    file pointer "ptr", and if it is not equal to EOF then it gets
+    assigned to "ch", and eventually goes to printf() and gets printed.
+    Then you go back to the beginning of the loop again, get another
+    character, check against EOF, print it out, and so on and so forth.
+    This process loops through until you reach EOF, or the end of the
+    file.
+
+- fputc() writes or appends the specified character to the pointed-to file.
+    Note: the operation of the file pointer passed in as a parameter must
+    be "w" for write, or "a" for append, or you will suffer an error. The
+    syntax is:
+
+        fputc(<character>, <file pointer>);
+
+    ...as with fgetc(), the file that you're writing to must have been
+    opened for writing or appending. For example:
+
+        fputc('A', ptr2);
+
+    ...would write the character 'A' to:
+
+        FILE* ptr2 = fopen("file2.txt", "w");
+
+    ...if you wanted to append the character 'A' instead, then the fopen()
+    function would look like:
+
+        FILE* ptr2 = fopen("file2.txt", "a");
+
+    ...or if you wanted to append the character 'A' to a different file, say
+    file3.txt, the fopen() function would look like:
+
+        FILE* ptr3 = fopen("file3.txt", "a");
+
+- Now we can read characters from files and write characters to them. Let's
+    extend our previous example to copy one file to another, instead of
+    printing to the screen:
+
+        char ch;
+        while ((ch = fgetc(ptr)) != EOF)
+            printf("%c", ch);
+
+    ...or you could substitute the call to printf() to a call to fputc():
+
+        char ch;
+        while ((ch = fgetc(ptr)) != EOF)
+            fputc(ch, ptr2);
+
+    ...we might put this in a file called cp.c, after the Linux command "cp",
+    which essentially does just this. In this particular example, the
+    characters from "ptr" are getting copied, as characters named "ch",
+    into the file "ptr2" until we hit EOF.
+
+- fread() considers both pointers and file pointers, which are similar but
+    have some differences. fread() will read <qty> units of size <size>
+    from the file pointed to, and stores them in memory in a buffer
+    (usually an array) pointed to by <buffer>. Note: the operation of
+    the file pointer passed in as a parameter must be "r" for read, or
+    you will suffer an error. The syntax is:
+
+        fread(<buffer>, <size>, <qty>, <file pointer>);
+
+    ...this is basically the generic version of fgetc() that allows us to
+    get any amount of information -- not just 1 character at a time. This
+    allows us to get an arbitrarily large amount of information from a
+    file and store it temporarily -- instead of fitting it in a single
+    variable, we might need to store it in an array[]. So, 4 arguments
+    are passed into fread():
+
+        <file pointer>  pointer to the location where data will be stored
+        <size>          how large each unit of information will be
+        <qty>           how many units of information we need
+        <buffer>        from which file we want to get them
+
+    ...for example, let's say we declare an array of 10 integers:
+
+        int arr[10];
+        fread(arr, sizeof(int), 10, ptr);
+
+    ...in this case, arr is the <buffer>, sizeof(int) is the <size>, 10
+    is the <qty>, and "ptr" is the <file pointer>. In this particular case,
+    sizeof(int) is 4 bytes, because integers are 4 bytes in C, and the
+    quantity is 10 -- so fread() is essentially reading 4 x 10, or 40
+    bytes of information from the file pointed to by "ptr", and we're
+    storing those 40 bytes somewhere where we're setting aside 40 bytes
+    worth of memory. Fortunately we've already done that by declaring
+    int arr[10] -- an array of 10 integers, each integer having 4 bytes,
+    so 4 x 10 = 40 bytes total.
+    ...recall that the name of an array, ex. arr, is really just a name to
+    the pointer of its first element. So, when arr is passed to fread(),
+    it's really just a pointer that is getting passed.
+
+- In the case of fread(), the first argument that was passed was an array.
+    This first argument is known as the "buffer". However, you don't need
+    to save your buffer on the "stack" or in an array -- you can declare
+    it dynamically. For example:
+
+        double* arr2 = malloc(sizeof(double) * 80);
+        fread(arr2, sizeof(double), 80, ptr);
+
+    ...by using malloc(), you are saving memory on the "heap" and not the
+    "stack" -- but it can still be used in the same way. However, it is
+    still a buffer, in this case it's holding 640 bytes of information (a
+    double takes up 8 bytes, 8 x 80 = 640). The call to fread() is calling
+    640 bytes of information (ie. sizeof(double) x 80) from the file
+    pointed to by "ptr" and storing it in arr2.
+
+- fread() can also be treated just like a call to fgetc(). It reads <qty>
+    units of size <size> from the file pointed to, and stores them in
+    memory in a buffer (usually an array) pointed to by <buffer>. Note:
+    the operation of the file pointer passed in as a parameter must be "r"
+    for read, or you will suffer an error. The syntax is:
+
+        char c;
+        fread(&c, sizeof(char), 1, ptr);
+
+    ...the catch though, is that when we just have a variable to store the
+    information instead of an array, we need to pass in the address of
+    that variable because the first argument to fread() is a pointer to
+    the location in memory where we want to store the information. So
+    basically, use the ampersand & symbol to signify the address of the
+    variable. I guess the difference is that when you use an array[] to
+    store information, the first character in the array is automatically
+    considered to be the address of the array[], whereas with a single
+    variable you have to explicitly state that it is being used as an
+    address.
+
+- fwrite() writes <qty> units of size <size> to the file pointed to by
+    reading them from a buffer (usually an array) pointed to by <buffer>.
+    Note: the operation of the file pointer passed in as a parameter must
+    be "w" for write or "a" for append, or you will suffer an error. The
+    syntax is:
+
+        fwrite(<buffer>, <size>, <qty>, <file pointer>);
+
+    ...this is pretty much the exact equivalent of fread() except it's for
+    writing instead of reading. So for instance:
+
+        int arr[10];
+
+        // write some code here to fill arr[] with 10 integers
+
+        fwrite(arr, sizeof(int), 10, ptr);
+
+    ...in this example, the array arr[] is created and can hold 10
+    integers. Somewhere in the code, let's say, you fill arr[] with some
+    10 integers. fwrite() will then write the contents of arr[] to another
+    place in memory, pointed to by ptr. So instead of going from the file
+    into the buffer (as with fread()), we're going from the buffer and
+    writing to the file. Just like before, you can declare the buffer
+    dynamically and store it on the "heap" instead of the "stack":
+
+        double* arr2 = malloc(sizeof(double) * 80);
+        fwrite(arr2, sizeof(double), 80, ptr);
+
+    ...and you can also have a single variable, capable of holding 1 byte
+    of information, but as before you have to write use an ampersand to
+    signify the address of the character:
+
+        char c;
+        fwrite(&c, sizeof(char), 1, ptr);
+
+- There are lots of other useful function in stdio.h to work with. Here
+    are some examples:
+
+    1. fgets()      reads a full string from a file
+    2. fputs()      writes a full string to a file
+    3. fprintf()    writes a formatted string to a file
+    4. fseek()      allows you to rewind or fast-forward within a file
+    5. ftell()      tells at what (byte) position you are within a file
+    6. feof()       tells you whether you've read to the end of a file
+    7. ferror()     indicates whether an error has occurred with a file
+
+DYNAMIC MEMORY ALLOCATION
+---------------------------------------------------------------------
+- So the way that pointers work, basically, is that you declare a variable
+    and it gets stored in some random place in memory. You then declare
+    another variable, a -pointer- variable, and it points to the original
+    variable -- so you have the declared variable, and another variable
+    that points to it. However, this creates somewhat of a problem -- we're
+    going to need to know how much memory our program is going to need the
+    moment that it is compiled. However, at the moment a program is
+    compiled, it may not be clear exactly how much memory is needed -- it
+    could be a small amount, or potentially a large amount. Dynamically-
+    allocated memory gets around this problem.
+
+- Dynamically-allocated memory -- we can use pointers to get access to a
+    block of memory at runtime, the size of which will be dynamically
+    created. Dynamically-allocated memory comes from a pool of memory
+    known as the "heap". Prior to this, all memory we've been working with
+    has been coming from a pool of memory known as the "stack".
+
+- As a general rule, anytime you give a variable a name, it -probably-
+    lives on the "stack". Anytimes you don't give a variable a name, which
+    you can do with dynamic memory allocation, it -probably- lives on the
+    "heap". The general visualization looks like this:
+
+        ----------------------
+                heap
+                  |
+                  |
+                  V
+
+                  ^
+                  |
+                  |
+                stack
+        ----------------------
+
+    ...where information stored in the "stack" starts at the bottom and
+    starts filling upwards, whereas information stored on the "heap"
+    starts at the top and starts filling downwards. This is just a
+    generalization. In reality, both the "heap" and the "stack" exist
+    within the same pool of memory -- it's just that there are different
+    spots, or locations in memory that are being allocated. You can run
+    out of memory by having the "heap" go all the way to the bottom, or
+    having the "stack" go all the way to the top, or having the two meet
+    up against each other somewhere in the middle.
+
+- So how do you get dynamically allocated memory in the first place?
+
+- We get this dynamically-allocated memory by making a call to the C
+    standard library function malloc(), passing as its parameter the
+    number of bytes requested. At runtime, malloc() will go through the
+    "heap" looking for available memory.
+
+- After obtaining memory for you (if it can), malloc() will return a
+    pointer to that memory. It doesn't give you a name, just a pointer to
+    that spot.
+
+
+- What if malloc() can't give you memory? It'll hand you back NULL and
+    suffer a segmentation fault. This is why every time you make a call
+    to malloc(), you -always- need to check whether or not the pointer
+    that it gives back is NULL -- if it is, you need to end your program,
+    because if you try to continue then you may suffer a segmentation
+    fault and your program is going to crash anyways.
+
+- In order to statically obtain an integer, you might write something
+    like:
+
+        int x;
+
+- In order to dynamically obtain an integer, you might write something
+    like:
+
+        int *px = malloc(4);
+
+- Or more appropriately, you might write:
+
+        int *px = malloc(sizeof(int));
+
+    ...in order to make sure that you are allocating 4 bytes to an integer
+    at location 'px'. Although, C does that automatically, but it's better
+    to be sure I guess. So this obtains 4 bytes of memory from the "heap",
+    and the pointer that we get back from it is called *px. As we've done
+    previously, we can dereference 'px' to get access to that memory.
+
+- How do we get an integer from the user? So far, using the cs50.h
+    library, we have used int x = get_int();. What if we want to create an
+    array of 'x' floats that live on the stack? You could type:
+
+        float stack_array[x];
+
+    ...which will create an array of 'x' number of floats that live on the
+    "stack". You can create an array of floats that live on the "heap" too,
+    using malloc():
+
+        float* heap_array = malloc(x * sizeof(float));
+
+    ...where 'x' is the number of floats that you need the "heap" array to
+    hold. After this declaration, you can use the square bracket syntax,
+    ex. array[], to access individual elements within the array.
+
+- Here's the big problem with dynamically-allocated memory: it is not
+    automatically returned to the system for later use when the function
+    in which it is created finishes execution.
+
+- Failing to return memory back to the system when you're finished with it
+    results in a -memory leak- which can compromise your system's
+    performance.
+
+- When you finish working with dynamically-allocated memory, you must
+    free() it -- you have to explicitly tell the system that you are done
+    with it, otherwise it will hold onto it. The syntax is:
+
+        char* word = malloc(50 * sizeof(char));
+
+        // do stuff with 'word', and when you're done:
+
+        free(word);
+
+    ...this returns 50 bytes of memory back to the system.
+
+- Three golden rules:
+
+    1. Every block of memory that you malloc() must subsequently be
+    free()'d
+
+    2. Only memory that you malloc() should be free()'d
+
+    3. Do not free() a block of memory more than once
+
+- So what happens when you combine static memory with dynamically-
+    allocated memory? Here's an example:
+
+        int m;      int* a;     int* b = malloc(sizeof(int));
+         _____       _____      _____
+        |     |     |  *  |    |  *  |
+        '''''''     '''''''    '''''''
+           m           a          b
+                                  |
+                                  |
+                                  V
+                                _____
+                               |     |
+                               '''''''
+
+    ...in this example, int m; simply creates a block of memory that
+    stores an integer named 'm'. int* a; creates a block of memory that
+    stores an address to an integer named 'a'. However, int* b =
+    malloc(sizeof(int)); actually creates two blocks of memory -- the
+    first one stores an address to an integer named 'b' that points to
+    another block of memory that is dynamically created on the "heap",
+    the size of which is equal to sizeof(int). The dynamically created
+    block of memory does not have a name, but 'b' has name -- it's a
+    pointer variable called 'b' that lives on the "stack". Kind of
+    confusing, but 'b' is the name of the block of memory on the stack
+    that contains an address, the address of which is an unnamed block
+    of memory on the "heap".
+
+- More examples:
+        a = &m;
+         _____       _____
+        |     |<----|  *  |
+        '''''''     '''''''
+           m           a
+
+    ...in this example, 'a' points to 'm'. In other words, 'a' stores the
+    address of 'm'.
+
+- More examples:
+
+        a = b;
+         _____       _____      _____
+        |     |     |  *  |    |  *  |
+        '''''''     '''''''    '''''''
+           m           a          b
+                       |          |
+                       |          |
+                       |          V
+                       |        _____
+                       L------>|     |
+                               '''''''
+    ...in this example, 'b' gets assigned to 'a', so the end result of
+    the diagram is displayed above (although I guess you could just draw
+    a line from 'a' to 'b' and it would sort of mean the same thing).
+    Since 'b' is just an address, assigning that address to 'a' simply
+    means that they both now point to the same address.
+
+- More examples:
+
+        m = 10;
+        *b = m + 2
+         _____       _____      _____
+        | 10  |     |  *  |    |  *  |
+        '''''''     '''''''    '''''''
+           m           a          b
+                       |          |
+                       |          |
+                       |          V
+                       |        _____
+                       L------>| 12  |
+                               '''''''
+
+    ...by assigning the -address- of *b = m + 2, the block of memory
+    that it is pointing to gets the value of 10 + 2 or 12.
+
+- More examples:
+
+        free(b);
+         _____       _____      _____
+        | 10  |     |  *  |    |  *  |
+        '''''''     '''''''    '''''''
+           m           a          b
+                       |          |
+                       |          |
+                       |          V
+                       |
+                       L------>
+
+    ...this will free the memory that *b (and also *a) were pointing
+    to.
+
+- More examples:
+
+        *a = 11;
+         _____       _____      _____
+        | 10  |     |  *  |    |  *  |
+        '''''''     '''''''    '''''''
+           m           a          b
+                       |          |
+                       |          |
+                       |          V
+                       |
+                       L------>
+
+    ...in this case, since the memory has already been free()'d, a* now
+    points to nothing -- you might suffer a segmentation fault by
+    accessing memory that you no longer have access to.
